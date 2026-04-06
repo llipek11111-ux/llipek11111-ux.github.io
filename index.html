@@ -1,0 +1,3142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Цивилизация 4.0 — Новые Горизонты</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background: #f4f4f4; color: #333; }
+    #main { max-width: 1300px; margin: 0 auto; padding: 20px; }
+    h1 { font-size: 28px; font-weight: 300; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .game-container { display: flex; gap: 20px; }
+    .game-left { flex: 1; }
+    .game-right { width: 340px; flex-shrink: 0; }
+    .sect { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; padding: 15px; margin-bottom: 15px; }
+    .sect-title { font-size: 12px; font-weight: 600; text-transform: uppercase; color: #888; display: block; margin-bottom: 10px; letter-spacing: 0.5px; }
+    .resource-bar { display: flex; flex-wrap: wrap; gap: 10px; font-size: 15px; font-weight: 500; }
+    .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+    button { padding: 6px 12px; border: 1px solid #ccc; border-radius: 3px; background: #fff; cursor: pointer; font-size: 13px; transition: background 0.1s; }
+    button:hover:not(:disabled) { background: #f0f0f0; }
+    button.primary { background: #333; color: #fff; border-color: #333; }
+    button.primary:hover:not(:disabled) { background: #555; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .log-container { height: 400px; overflow-y: auto; font-size: 13px; line-height: 1.5; }
+    .log-entry { padding: 4px 0; border-bottom: 1px solid #f0f0f0; }
+    .log-turn { font-weight: 600; color: #888; font-size: 11px; margin-right: 5px; }
+    .victory { color: #28a745; } .loss { color: #dc3545; } .notice { color: #17a2b8; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto; }
+    .modal-content { background: #fff; margin: 40px auto; padding: 30px; max-width: 600px; border-radius: 4px; position: relative; }
+    .modal-body { max-height: 70vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+    .modal-title { font-size: 20px; font-weight: 300; }
+    .close { color: #aaa; font-size: 24px; cursor: pointer; }
+    .close:hover { color: #000; }
+    .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .leaderboard-table th, .leaderboard-table td { text-align: left; padding: 8px; border-bottom: 1px solid #eee; font-size: 14px; }
+    .leaderboard-table th { font-weight: 600; color: #888; text-transform: uppercase; font-size: 12px; }
+    .science-bar { background: #eee; height: 6px; border-radius: 3px; margin: 8px 0; overflow: hidden; }
+    .science-progress { height: 100%; background: #666; width: 0%; transition: width 0.3s; }
+    .start-screen { text-align: center; padding: 60px 20px; }
+    .start-input { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 3px; margin-bottom: 15px; width: 250px; text-align: center; }
+    .start-button { padding: 10px 30px; font-size: 16px; background: #333; color: #fff; border: none; }
+    .world-map-container { margin: 20px 0; padding: 15px; background: #f9f9f9; border: 1px solid #eee; border-radius: 4px; overflow-x: auto; max-width: 766px; scroll-behavior: smooth; }
+    .world-map-grid { display: flex; flex-direction: row; gap: 4px; width: max-content; }
+    .map-cell { width: 60px; min-width: 60px; height: 60px; border: 1px solid #ddd; border-radius: 3px; padding: 4px; font-size: 10px; position: relative; background: #f8f9fa; color: #333; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .map-cell-label { font-weight: bold; margin-bottom: 4px; }
+    .map-cell-content { text-align: center; }
+    .capture-info { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; border-radius: 4px; margin: 10px 0; font-size: 12px; }
+    .global-stats-box { background: #eef2f5; border: 1px solid #d0d7de; padding: 12px; border-radius: 4px; font-size: 13px; line-height: 1.5; margin-bottom: 20px; }
+    .squad-management-box .squad-row { background:#f8f9fa; border:1px solid #dee2e6; padding:10px; margin-bottom:10px; border-radius:4px; }
+    .squad-management-box .squad-row button { padding: 4px 8px; font-size: 12px; }
+    .squad-moves { font-weight: bold; padding: 2px 6px; border-radius: 3px; background: #eef9ee; border: 1px solid #c3e6c3; }
+    .market-price-box { background: #fff8e1; border: 1px solid #ffc107; padding: 10px; border-radius: 4px; margin-bottom: 12px; font-size: 12px; line-height: 1.8; }
+    .qty-input { width: 70px; padding: 4px 6px; border: 1px solid #ccc; border-radius: 3px; }
+    .season-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; margin-left: 8px; }
+    .season-summer { background: #fff3cd; color: #856404; }
+    .season-winter { background: #cff4fc; color: #055160; }
+    .rank-badge { font-size: 10px; padding: 1px 5px; border-radius: 8px; background: #6c757d; color: #fff; margin-left: 4px; }
+    .rank-1 { background: #adb5bd; }
+    .rank-2 { background: #6c757d; }
+    .rank-3 { background: #fd7e14; }
+    .rank-4 { background: #dc3545; }
+  </style>
+</head>
+<body>
+<div id="main">
+  <h1>Цивилизация 4.0 <span style="font-size:0.5em; color:#999; vertical-align: middle;">Новые Горизонты</span></h1>
+  <div id="game"></div>
+</div>
+
+<!-- Модальные окна -->
+<div id="marketModal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">Рынок</div><span class="close" onclick="closeModal('marketModal')">&times;</span></div><div class="modal-body">
+  <p>Казна: <strong id="marketGold">0</strong></p>
+  <div class="market-price-box" id="marketPriceInfo">Загрузка цен...</div>
+  <div class="row"><span>Продать Железо:</span><input type="number" id="modalSellIronInput" class="qty-input" value="10"><button onclick="uiTradeResource('sell', 'iron', 'modalSellIronInput')">Продать</button></div>
+  <div class="row"><span>Купить Еду:</span><input type="number" id="modalBuyFoodInput" class="qty-input" value="10"><button onclick="uiTradeResource('buy', 'food', 'modalBuyFoodInput')">Купить</button></div>
+  <div class="row"><span>Продать Еду:</span><input type="number" id="modalSellFoodInput" class="qty-input" value="10"><button onclick="uiTradeResource('sell', 'food', 'modalSellFoodInput')">Продать</button></div>
+  <div class="row"><span>Купить Железо:</span><input type="number" id="modalBuyIronInput" class="qty-input" value="10"><button onclick="uiTradeResource('buy', 'iron', 'modalBuyIronInput')">Купить</button></div>
+  <div class="row"><span>Купить Дерево:</span><input type="number" id="modalBuyWoodInput" class="qty-input" value="10"><button onclick="uiTradeResource('buy', 'wood', 'modalBuyWoodInput')">Купить</button></div>
+  <div class="row"><span>Продать Дерево:</span><input type="number" id="modalSellWoodInput" class="qty-input" value="10"><button onclick="uiTradeResource('sell', 'wood', 'modalSellWoodInput')">Продать</button></div>
+</div></div></div>
+
+<div id="bankModal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">Банк</div><span class="close" onclick="closeModal('bankModal')">&times;</span></div><div class="modal-body">
+  <p>Казна: <strong id="bankGoldDisplay">0</strong></p>
+  <p>Репутация: <strong id="bankReputationDisplay">0</strong> | Процент по депозиту: <strong id="bankRateDisplay">20</strong>%</p>
+  <div class="capture-info">Депозит замораживается на 5 ходов. Чем выше репутация — тем лучше ставка (до 40%).</div>
+  <p>Текущий депозит: <strong id="bankCurrentDeposit">0</strong> (Осталось ходов: <span id="bankTurnsLeft">0</span>)</p>
+  <div class="row"><span>Внести депозит:</span><input type="number" id="bankDepositInput" class="qty-input" value="1000" style="width: 80px;"><button class="primary" onclick="makeBankDeposit()">Внести</button></div>
+</div></div></div>
+
+<div id="universityModal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">Университет</div><span class="close" onclick="closeModal('universityModal')">&times;</span></div><div class="modal-body">
+  <div class="sect">
+    <span class="sect-title">Обучение ученых</span>
+    <p>Текущее количество ученых: <strong id="uniScientistsCount">0</strong></p>
+    <p>Рабочих: <strong id="uniWorkersCount">0</strong></p>
+    <div class="capture-info">1 учёный = 100💰 + 1 рабочий. 100 ученых за 5 ходов. Скорость науки зависит от учёных.</div>
+    <div id="uniScientistTrainingStatus" style="margin-bottom:10px;"></div>
+    <div class="row"><input type="number" id="trainScientistsQty" class="qty-input" value="10"><button onclick="trainScientists()" class="primary">Обучить</button></div>
+  </div>
+  <div class="sect">
+    <span class="sect-title">Научные исследования</span>
+    <p style="font-size:12px; color:#666;">100 учёных изучают 1% науки за 1 ход. Направить учёных: выберите науку.</p>
+    <div style="margin-bottom: 20px;">
+      <div>Лесничество (<span id="uniForestLvl">0</span>%) — Назначено учёных: <span id="uniForestAssigned">0</span></div>
+      <div class="science-bar"><div id="uniForestBar" class="science-progress"></div></div>
+      <div class="row"><input type="number" id="assignForestryScientists" class="qty-input" value="100" min="0"><button onclick="assignScientists('forestry')">Направить</button></div>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <div>Горное дело (<span id="uniMiningLvl">0</span>%) — Назначено учёных: <span id="uniMiningAssigned">0</span></div>
+      <div class="science-bar"><div id="uniMiningBar" class="science-progress"></div></div>
+      <div class="row"><input type="number" id="assignMiningScientists" class="qty-input" value="100" min="0"><button onclick="assignScientists('mining')">Направить</button></div>
+    </div>
+    <div>
+      <div>Добыча железа (<span id="uniIronMiningLvl">0</span>%) — Назначено учёных: <span id="uniIronAssigned">0</span></div>
+      <div class="science-bar"><div id="uniIronMiningBar" class="science-progress"></div></div>
+      <div class="row"><input type="number" id="assignIronMiningScientists" class="qty-input" value="100" min="0"><button onclick="assignScientists('ironMining')">Направить</button></div>
+    </div>
+  </div>
+</div></div></div>
+
+<div id="townhallModal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">Ратуша</div><span class="close" onclick="closeModal('townhallModal')">&times;</span></div><div class="modal-body">
+  <p>Статистика и управление:</p>
+  <div id="townhallStats" style="line-height: 1.6; margin-bottom:15px;"></div>
+  <div id="generalSection" style="background:#f9f9f9; padding:10px; border:1px solid #eee; margin-bottom:15px;">
+    <div id="generalDisplay"></div>
+    <div id="generalActions"></div>
+  </div>
+  <hr style="border:0; border-top:1px solid #eee; margin: 15px 0;">
+  <div class="sect"><span class="sect-title">Тайные операции (Диверсии)</span>
+    <p style="font-size:12px; color:#666;">Можно проводить 1 раз в 3 хода. Применяется к случайному соседнему отряду врага.</p>
+    <div style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #ddd;">
+      <strong>Вербовка</strong> (Уровень: <span id="recruitLvlDisplay"></span>/100) — Кулдаун: <span id="recruitCdDisplay"></span> х.<br>
+      <div class="row" style="margin-top:5px;"><input type="number" id="upgradeRecruitQty" class="qty-input" value="1" min="1"><button onclick="upgradeEspionage('recruit')">Улучшить (200 зол/ур)</button><button class="primary" onclick="executeRecruit()">Завербовать армию</button></div>
+    </div>
+    <div>
+      <strong>Воровство</strong> (Уровень: <span id="stealLvlDisplay"></span>/100) — Кулдаун: <span id="stealCdDisplay"></span> х.<br>
+      <small style="color:#666;">Ур.100: украсть 10-20% ресурсов соседа</small>
+      <div class="row" style="margin-top:5px;"><input type="number" id="upgradeStealQty" class="qty-input" value="1" min="1"><button onclick="upgradeEspionage('steal')">Улучшить (200 зол/ур)</button><button class="primary" onclick="executeSteal()">Украсть ресурсы</button></div>
+    </div>
+  </div>
+</div></div></div>
+
+<div id="barracksModal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">Казармы</div><span class="close" onclick="closeModal('barracksModal')">&times;</span></div><div class="modal-body">
+  <div class="sect"><span class="sect-title">Найм войск</span>
+    <p>Рабочих: <strong id="barracksWorkers">0</strong>. 1 юнит = 1 рабочий.</p>
+    <div class="row"><input type="number" id="trainInfantryCount" class="qty-input" value="10"> <button class="primary" onclick="trainUnit('infantry')">Обучить Пехоту 🗡️</button> <span id="costInfantry"></span></div>
+    <div class="row"><input type="number" id="trainShootersCount" class="qty-input" value="10"> <button class="primary" onclick="trainUnit('shooters')">Обучить Стрелков 🏹</button> <span id="costShooters"></span></div>
+    <div class="row"><input type="number" id="trainCavalryCount" class="qty-input" value="10"> <button class="primary" onclick="trainUnit('cavalry')">Обучить Кавалерию 🐎</button> <span id="costCavalry"></span></div>
+    <div id="tankNote" style="font-size:12px; color:#888; margin-top:5px;"></div>
+  </div>
+</div></div></div>
+
+<div id="factoryModal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">Завод</div><span class="close" onclick="closeModal('factoryModal')">&times;</span></div><div class="modal-body">
+  <div class="sect"><span class="sect-title">Производство танков</span>
+    <p id="factoryOilInfo"></p>
+    <div class="row" id="tankTrainRow"><input type="number" id="trainTanksCount" class="qty-input" value="1"> <button class="primary" onclick="trainUnit('tanks')">Построить Танк 🚗</button> <span id="costTanks"></span></div>
+    <div id="factoryTankNote" style="font-size:12px; color:#888; margin-top:5px;"></div>
+  </div>
+  <div class="sect"><span class="sect-title">Нефтяные месторождения</span>
+    <div id="factoryOilFields"></div>
+    <p style="font-size:12px; color:#888; margin-top:5px;">⚠️ Разработка болот доступна через меню отрядов (когда отряд стоит на болоте).</p>
+  </div>
+</div></div></div>
+
+<div id="hireGeneralModal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">Найм генерала</div><span class="close" onclick="closeModal('hireGeneralModal')">&times;</span></div><div class="modal-body">
+  <p style="margin-bottom:10px;">Генерал усиливает ВСЕ ваши отряды. Цена найма: 300💰</p>
+  <input type="text" id="generalNameInput" class="start-input" placeholder="Имя генерала" style="width: 100%; box-sizing: border-box;">
+  <button class="primary" onclick="confirmHireGeneral()" style="width: 100%; margin-top:10px;">Нанять генерала</button>
+</div></div></div>
+
+<div id="leaderboardModal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">Зал Славы</div><span class="close" onclick="closeModal('leaderboardModal')">&times;</span></div><div class="modal-body" id="leaderboardBody"></div></div></div>
+
+<div id="villageModal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">Деревня</div><span class="close" onclick="closeModal('villageModal')">&times;</span></div><div class="modal-body">
+    <div id="landStatsDisplay" class="land-stats" style="margin-bottom:20px;"></div>
+    <div class="sect">
+        <span class="sect-title">Добыча железа</span>
+        <p>Доступные горы: <strong id="availableMountains">0</strong></p>
+        <p>Уровень науки добычи железа: <strong id="ironMiningLevel">0</strong>%</p>
+        <p>Добыча с одной горы: <strong id="ironPerMountain">3</strong> железа</p>
+        <div class="capture-info">Каждая добытая гора уменьшает общее количество гор.</div>
+        <div class="row"><input type="number" id="mineIronQty" class="qty-input" value="1" min="1"><button onclick="mineIron()">Добыть железо (кол-во гор)</button></div>
+    </div>
+    <div class="sect">
+        <span class="sect-title">Лесозаготовка</span>
+        <p>Доступные леса: <strong id="availableForests">0</strong></p>
+        <p>Уровень науки: <strong id="forestryLevel">0</strong>%</p>
+        <p>Добыча с леса: <strong id="woodPerForest">50</strong> дерева</p>
+        <div class="row"><input type="number" id="chopWoodQty" class="qty-input" value="1" min="1"><button onclick="chopWood()">Вырубить лес (кол-во)</button></div>
+    </div>
+    <div class="sect">
+        <span class="sect-title">Фермерство</span>
+        <p>Доступно равнин для ферм: <strong id="availablePlainsForFarms">0</strong> (1 ферма = 100 равнин)</p>
+        <p>Активных ферм: <strong id="activeFarmsCount">0</strong></p>
+        <div class="capture-info">Ферма строится 3 хода, затем 15 ходов приносит еду (500, 400, 300).</div>
+        <div class="row"><input type="number" id="buildFarmQty" class="qty-input" value="1" min="1"><button onclick="buildFarm()">Построить фермы (кол-во)</button></div>
+    </div>
+    <div class="sect">
+        <span class="sect-title">Рабочие на разработку нефти</span>
+        <p>Свободных рабочих: <strong id="villageWorkers">0</strong></p>
+        <div class="capture-info">Назначьте рабочих на ускорение разработки нейтрального месторождения. Каждые 100 рабочих сокращают разработку на 1 ход.</div>
+        <div id="oilDevelopWorkersList"></div>
+    </div>
+</div></div></div>
+
+<div id="reinforceModal" class="modal"><div class="modal-content"><div class="modal-header"><div class="modal-title">Подкрепление</div><span class="close" onclick="closeModal('reinforceModal')">&times;</span></div><div class="modal-body" id="reinforceBody"></div></div></div>
+
+<div id="raidModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title">Рейд на страну</div><span class="close" onclick="closeModal('raidModal')">&times;</span></div>
+    <div class="modal-body" id="raidBody"></div>
+  </div>
+</div>
+
+<div id="nameInputModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header"><div class="modal-title" id="nameInputModalTitle"></div><span class="close" onclick="closeModal('nameInputModal')">&times;</span></div>
+    <div class="modal-body">
+      <input type="text" id="nameInputModalField" class="start-input" placeholder="Введите имя" style="width: 100%; box-sizing: border-box;">
+      <button class="primary" onclick="confirmNameInput()" style="width: 100%">Подтвердить</button>
+    </div>
+  </div>
+</div>
+
+<div id="neighborsModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">🌍 Соседи — разведданные</div>
+      <span class="close" onclick="closeModal('neighborsModal')">&times;</span>
+    </div>
+    <div class="modal-body" id="neighborsBody">
+      <p>Ваши отряды ещё не посещали сектора ни одной соседней страны.</p>
+    </div>
+  </div>
+</div>
+
+<div id="coloniesModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+        <div class="modal-title">Ваши колонии</div>
+        <span class="close" onclick="closeModal('coloniesModal')">&times;</span>
+    </div>
+    <div class="modal-body" id="coloniesBody"></div>
+  </div>
+</div>
+
+<div id="leadersModal" class="modal">
+    <div class="modal-content" style="max-width: 1100px;">
+        <div class="modal-header">
+            <div class="modal-title">Мировые лидеры</div>
+            <span class="close" onclick="closeModal('leadersModal')">&times;</span>
+        </div>
+        <div class="modal-body" id="leadersBody"></div>
+    </div>
+</div>
+
+<div id="artifactsModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">🏺 Артефакты отряда</div>
+      <span class="close" onclick="closeModal('artifactsModal')">&times;</span>
+    </div>
+    <div class="modal-body" id="artifactsBody"></div>
+  </div>
+</div>
+
+<div id="homeGuardModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">🏰 Охрана базы</div>
+      <span class="close" onclick="closeModal('homeGuardModal')">&times;</span>
+    </div>
+    <div class="modal-body" id="homeGuardBody"></div>
+  </div>
+</div>
+
+<div id="unknownArtifactsModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">🔍 Неизвестные артефакты</div>
+      <span class="close" onclick="closeModal('unknownArtifactsModal')">&times;</span>
+    </div>
+    <div class="modal-body" id="unknownArtifactsBody"></div>
+  </div>
+</div>
+
+<div id="fullLogModal" class="modal">
+  <div class="modal-content" style="max-width:800px;">
+    <div class="modal-header">
+      <div class="modal-title">📜 Полная история ходов</div>
+      <span class="close" onclick="closeModal('fullLogModal')">&times;</span>
+    </div>
+    <div class="modal-body" id="fullLogBody" style="max-height:80vh; overflow-y:auto;"></div>
+  </div>
+</div>
+
+<script>
+const COUNTRY_COLORS = ["#007bff","#fd7e14","#6f42c1","#e83e8c","#20c997","#17a2b8","#6610f2","#d63384","#0d6efd","#0dcaf0","#6f42c1","#8b4513","#ff6347"];
+const BOT_CITIES = ["Сочи","Берлин","МАЯМИ","Пекин","Токио","Лондон","Париж","Москва","Рим","Мадрид","Сидней","Дели","Каир","Нью-Йорк","Дубай","Сеул","Минск","Варшава","Осло","Прага"];
+const BOT_SQUADS = ["Бетмен","Джокер","Ниндзя","Шредер","Супермен","Человек-паук","Дракула","Терминатор","Рэмбо","Нео","Гарри Поттер","Дарт Вейдер","Фродо","Гендальф"];
+const TITAN_NAMES = ["Горгон","Молох","Кронос","Тифон","Аргос","Нимрод","Голем","Левиафан","Бегемот","Демогоргон","Балрог","Тиамат","Хаос","Абаддон","Ваал"];
+
+// Ранги отрядов (изм. #35)
+const SQUAD_RANKS = [
+    { name: "Рекрут", minWins: 0, bonus: 1.0, cls: "rank-1" },
+    { name: "Солдат", minWins: 3, bonus: 1.3, cls: "rank-2" },
+    { name: "Ветеран", minWins: 8, bonus: 1.7, cls: "rank-3" },
+    { name: "Элита", minWins: 20, bonus: 2.2, cls: "rank-4" }
+];
+
+function getSquadRank(squad) {
+    const wins = squad.wins || 0;
+    let rank = SQUAD_RANKS[0];
+    for (const r of SQUAD_RANKS) { if (wins >= r.minWins) rank = r; }
+    return rank;
+}
+
+// Артефакты
+const ARTIFACTS = {
+    atomic_bomb: { id: 'atomic_bomb', name: 'Атомная бомба', desc: 'Уничтожает любую страну на карте', chance: 0.000001, icon: '☢️' },
+    levitation_boots: { id: 'levitation_boots', name: 'Сапоги левитации', desc: 'Переместить отряд в любую точку карты', chance: 0.1, icon: '🥾' },
+    goblin_ring: { id: 'goblin_ring', name: 'Кольцо гоблина', desc: '+100 силы генералу отряда', chance: 0.1, icon: '💍' },
+    grouse_bowstring: { id: 'grouse_bowstring', name: 'Тетива из тетерева', desc: 'Коэффициент стрелков s3 = 5 (вместо 2.8)', chance: 0.1, icon: '🏹' },
+    // Титановые артефакты (изм. #8)
+    titan_halberd: { id: 'titan_halberd', name: 'Титановая алебарда', desc: '+200000 к навыку генерала', chance: 0, icon: '⚔️' },
+    titan_cuirass: { id: 'titan_cuirass', name: 'Титановая кираса', desc: 'Сила армии ×1.3', chance: 0, icon: '🛡️' },
+    titan_boot: { id: 'titan_boot', name: 'Титановый бахил', desc: 'Левитация навсегда (не тратится)', chance: 0, icon: '👡' },
+    titan_horseshoe: { id: 'titan_horseshoe', name: 'Титановая подкова', desc: 'Сила кавалеристов ×5', chance: 0, icon: '🐴' },
+    titan_helmet: { id: 'titan_helmet', name: 'Титановый шлем', desc: 'Опыт с боёв ×1.3', chance: 0, icon: '⛑️' },
+    titan_banner: { id: 'titan_banner', name: 'Титановое знамя победы', desc: 'Воскрешает 30% потерянных юнитов при победе', chance: 0, icon: '🏳️' }
+};
+const TITAN_ARTIFACT_KEYS = ['titan_halberd','titan_cuirass','titan_boot','titan_horseshoe','titan_helmet','titan_banner'];
+
+let state = {};
+
+const INITIAL_STATE = {
+    nextTitanNumber: 1,
+    turn: 1,
+    name: "",
+    color: "#28a745",
+    resources: { gold: 1500, food: 1000000, iron: 500, wood: 500, oil: 0 },
+    buildings: { townhall: 0, barracks: 0, village: 0, market: 0, university: 0, bank: 0, factory: 0 },
+    buildingQueue: [],
+    sciences: { forestry: 0, mining: 0, ironMining: 0 },
+    scienceAssignments: { forestry: 0, mining: 0, ironMining: 0 },
+    army: { infantry: 50, cavalry: 0, shooters: 0, tanks: 0 },
+    general: { hired: false, name: "", skill: 1, exp: 0 },
+    espionage: { recruitLvl: 0, recruitCd: 0, stealLvl: 0, stealCd: 0 },
+    bankInfo: { deposit: 0, turnsLeft: 0 },
+    globalStats: { lostTroops: 0, killedTroops: 0, enemyCapturedCountries: 0, playerCapturedCountries: 0 },
+    captures: 0,
+    starvationTurns: 0,
+    farms: [],
+    log: [],
+    land: { total: 1000, mountains: 300, forests: 400, plains: 300 },
+    colonies: [],
+    oilFields: [],
+    gameOver: false,
+    deathReason: "",
+    gameStarted: false,
+    score: 0,
+    worldMap: { cells: [] },
+    homeBaseIndex: 50,
+    focusSector: 50,
+    squads: [],
+    nextSquadId: 0,
+    enemyCountries: [],
+    scientists: 200,
+    scientistTrainingQueue: { quantity: 0, turnsLeft: 0 },
+    nextBotSpawnTurn: 0,
+    visitedCountryIds: [],
+    activityGifts: { nextGiftTurn: 10 },
+    allyId: null,
+    homeGuard: { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 },
+    unknownArtifacts: [],
+    topBattles: [],
+    workers: 500,
+    reputation: 0,
+    season: 'summer',
+    discoveries: [],
+    warActivity: 0,
+};
+
+// Изм. #31, #33: стоимость юнитов
+const COSTS = { build: { townhall: 200, barracks: 150, village: 80, market: 120, university: 300, bank: 10000, factory: 500 }, general: 300, upgradeGenSkill: 500 };
+const UNIT_COSTS = {
+    infantry: { gold: 8, iron: 3, food: 3 },
+    shooters: { gold: 12, iron: 5, food: 2 },
+    cavalry: { gold: 10, iron: 4, food: 8 },
+    tanks: { gold: 30, iron: 20, food: 10, oil: 20, wood: 20 }
+};
+const PRICES = { food: { buy: 10, sell: 5 }, iron: { buy: 20, sell: 15 }, wood: { buy: 15, sell: 10 } };
+const COLONY_CAPTURE_TURNS = 3;
+const COUNTRY_CAPTURE_TURNS = 5;
+const BUILDING_TIMES = { university: 5, townhall: 3, market: 4, barracks: 3, factory: 6 };
+const COLONY_LIFESPAN = 20;
+const OIL_FIELD_DEVELOP_TURNS = 20;
+const TITAN_ARMY_COMPOSITION = { infantry: 200, cavalry: 100, shooters: 150, tanks: 50 };
+
+// Динамические цены рынка
+let marketState = {
+    food: { supply: 50000, maxSupply: 50000, price: 5, basePrice: 5, replenishRate: 2000, demand: 0 },
+    iron: { supply: 20000, maxSupply: 20000, price: 15, basePrice: 15, replenishRate: 500, demand: 0 },
+    wood: { supply: 30000, maxSupply: 30000, price: 10, basePrice: 10, replenishRate: 800, demand: 0 },
+};
+
+// Случайные научные открытия (изм. #5)
+const SCIENCE_DISCOVERIES = [
+    { id: 'iron_smelting', name: 'Переплавка железа', desc: '+25% к добыче железа с горы', apply: (s) => s.ironBonus = (s.ironBonus || 0) + 0.25 },
+    { id: 'wood_processing', name: 'Обработка дерева', desc: '+25% к добыче дерева с леса', apply: (s) => s.woodBonus = (s.woodBonus || 0) + 0.25 },
+    { id: 'oil_refinery', name: 'Нефтепереработка', desc: '+25% к добыче нефти с месторождения', apply: (s) => s.oilBonus = (s.oilBonus || 0) + 0.25 },
+    { id: 'demo_explosion', name: 'Демографический взрыв', desc: '+25% к приросту рабочих', apply: (s) => s.workerGrowthBonus = (s.workerGrowthBonus || 0) + 0.25 },
+    { id: 'farm_boom', name: 'Фермерский бум', desc: '+25% к добыче еды с равнины', apply: (s) => s.foodBonus = (s.foodBonus || 0) + 0.25 },
+];
+
+function getSeason() {
+    const cycle = Math.floor((state.turn - 1) / 50) % 2;
+    return cycle === 0 ? 'summer' : 'winter';
+}
+
+function getSeasonLabel() {
+    return state.season === 'summer' ? '☀️ Лето' : '❄️ Зима';
+}
+
+function getBankRate() {
+    const base = 0.20;
+    const repBonus = Math.min(0.20, state.reputation * 0.01);
+    if (state.season === 'summer') return base + repBonus + 0.02;
+    return base + repBonus;
+}
+
+function openModal(id) { document.getElementById(id).style.display = 'block'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+let _nameInputCallback = null;
+function openNameInputModal(title, callback) {
+    document.getElementById('nameInputModalTitle').innerText = title;
+    document.getElementById('nameInputModalField').value = '';
+    _nameInputCallback = callback;
+    openModal('nameInputModal');
+}
+function confirmNameInput() {
+    const val = document.getElementById('nameInputModalField').value.trim();
+    closeModal('nameInputModal');
+    if (_nameInputCallback) { _nameInputCallback(val); _nameInputCallback = null; }
+}
+function getBuildingName(k) {
+    const names = { townhall: 'Ратуша', barracks: 'Казармы', village: 'Деревня', market: 'Рынок', university: 'Университет', bank: 'Банк', factory: 'Завод' };
+    return names[k] || k;
+}
+
+function generateSquadName() {
+    const ADJ = ["Бешеные","Стальные","Кровавые","Дикие","Ночные","Слепые","Смертоносные","Ужасные","Грязные","Хитрые","Грозные","Железные"];
+    const NOUN = ["Псы","Волки","Топоры","Тени","Кабаны","Убийцы","Гоблины","Орлы","Змеи","Медведи","Драконы","Клинки"];
+    let name; let attempts = 0;
+    do { name = ADJ[Math.floor(Math.random() * ADJ.length)] + " " + NOUN[Math.floor(Math.random() * NOUN.length)];
+         if (attempts > 30) name += " " + Math.floor(Math.random() * 100); attempts++;
+    } while (!isSquadNameUnique(name));
+    return name;
+}
+
+function generateBotSquadName() {
+    let name; let attempts = 0;
+    do { name = BOT_SQUADS[Math.floor(Math.random() * BOT_SQUADS.length)] + " " + Math.floor(Math.random() * 100);
+         if (attempts > 30) name += "-" + Math.floor(Math.random() * 100); attempts++;
+    } while (!isSquadNameUnique(name));
+    return name;
+}
+
+function generateBotCountryName() {
+    let name; let attempts = 0;
+    do { name = BOT_CITIES[Math.floor(Math.random() * BOT_CITIES.length)];
+         if (attempts > 15) name += " " + Math.floor(Math.random() * 1000); attempts++;
+    } while (state.enemyCountries.some(c => c.name === name));
+    return name;
+}
+
+function isSquadNameUnique(name, currentSquadId = null) {
+    if (state.squads.some(s => s.name === name && s.id !== currentSquadId)) return false;
+    for (const country of state.enemyCountries) { if (country.squads.some(s => s.name === name)) return false; }
+    return true;
+}
+
+function isGeneralNameUnique(name, isPlayerGeneral = true) {
+    if (isPlayerGeneral) { for (const country of state.enemyCountries) { if (country.general.hired && country.general.name === name) return false; } }
+    else { if (state.general.hired && state.general.name === name) return false;
+           const otherBots = state.enemyCountries.filter(c => c.general.hired);
+           if (otherBots.some(c => c.general.name === name)) return false; }
+    return true;
+}
+
+function randomStartingArmy() {
+    const total = 100 + Math.floor(Math.random() * 901);
+    const r1 = Math.random(); const r2 = Math.random();
+    const cut1 = Math.min(r1, r2); const cut2 = Math.max(r1, r2);
+    const inf = Math.floor(cut1 * total);
+    const cav = Math.floor((cut2 - cut1) * total);
+    const sho = total - inf - cav;
+    return { infantry: inf, cavalry: cav, shooters: Math.max(0, sho), tanks: 0 };
+}
+
+function initGame() {
+    state = JSON.parse(JSON.stringify(INITIAL_STATE));
+    state.army = randomStartingArmy();
+    state.nextBotSpawnTurn = state.turn + Math.floor(Math.random() * 13) + 3;
+    state.topBattles = [];
+    state.discoveries = [];
+    state.season = 'summer';
+    marketState = {
+        food: { supply: 50000, maxSupply: 50000, price: 5, basePrice: 5, replenishRate: 2000, demand: 0 },
+        iron: { supply: 20000, maxSupply: 20000, price: 15, basePrice: 15, replenishRate: 500, demand: 0 },
+        wood: { supply: 30000, maxSupply: 30000, price: 10, basePrice: 10, replenishRate: 800, demand: 0 },
+    };
+}
+
+function initWorldMap() {
+    state.worldMap.cells = [];
+    const TOTAL_SECTORS = 1000;
+    for (let i = 0; i < TOTAL_SECTORS; i++) {
+        state.worldMap.cells.push({ index: i, objects: [] });
+    }
+    getCellAt(state.homeBaseIndex).objects.push({ type: 'player_base', name: state.name });
+    generateInitialCountries();
+}
+
+function getCellAt(index) {
+    if (index < 0 || index >= state.worldMap.cells.length) return null;
+    return state.worldMap.cells[index];
+}
+
+function generateInitialCountries() {
+    state.enemyCountries = [];
+    let availableColors = [...COUNTRY_COLORS];
+
+    const botCount = 25 + Math.floor(Math.random() * 26);
+    const desertCount = 700 + Math.floor(Math.random() * 51);
+
+    const allIndices = [];
+    for (let i = 0; i < 1000; i++) { if (i !== state.homeBaseIndex) allIndices.push(i); }
+    for (let i = allIndices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allIndices[i], allIndices[j]] = [allIndices[j], allIndices[i]];
+    }
+
+    let idCounter = 0;
+
+    for (let i = 0; i < botCount && i < allIndices.length; i++) {
+        const idx = allIndices[i];
+        const cName = generateBotCountryName();
+        const colorIdx = Math.floor(Math.random() * availableColors.length);
+        const startArmy = randomStartingArmy();
+
+        const country = {
+            id: idCounter++, name: cName, color: availableColors[colorIdx % availableColors.length],
+            resources: { gold: 400, food: 18000000, iron: 90, wood: 200, oil: 0 },
+            buildings: { townhall: 1, barracks: 1, village: 1, market: 1, university: 1, bank: 0, factory: 0 },
+            scientists: 10 + Math.floor(Math.random() * 20), sciences: { forestry: 0, mining: 0, ironMining: 0 },
+            army: startArmy,
+            general: { hired: true, name: `Генерал ${cName.split(' ')[0]}`, skill: 1 + Math.floor(Math.random() * 3), exp: 0 },
+            land: { total: 700, mountains: 120, forests: 180, plains: 400 },
+            homeBaseIndex: idx, captured: false, squads: [], nextSquadId: 0, farms: [],
+            botNextAction: {}, botRecruitCd: 0, starvationTurns: 0, captures: 0, turnsAlive: 0,
+            allyId: null, oilFields: [], immunityTurns: 5, workers: 200
+        };
+        while (!isGeneralNameUnique(country.general.name, false)) {
+            country.general.name = `Генерал ${cName.split(' ')[0]}${Math.floor(Math.random() * 100)}`;
+        }
+
+        const numSquads = 1 + Math.floor(Math.random() * 2);
+        for (let j = 0; j < numSquads; j++) {
+            const squad = {
+                id: country.nextSquadId++, name: generateBotSquadName(), ownerId: country.id, position: idx,
+                army: { infantry: 30 + Math.floor(Math.random() * 20), cavalry: 5 + Math.floor(Math.random() * 10), shooters: 5 + Math.floor(Math.random() * 10), tanks: 0 },
+                artifacts: [], capturingColony: null, capturingCountry: null, capturingOilField: null, hasRaidedThisTurn: false, wins: 0
+            };
+            country.squads.push(squad);
+            getCellAt(idx).objects.push({ type: 'squad_enemy', squadId: squad.id, ownerId: country.id });
+        }
+        state.enemyCountries.push(country);
+        getCellAt(idx).objects.push({ type: 'country_base', id: country.id });
+    }
+
+    for (let i = botCount; i < botCount + desertCount && i < allIndices.length; i++) {
+        const idx = allIndices[i];
+        const dName = "Пустыня-" + idx;
+        const desert = {
+            id: idCounter++, name: dName, color: "#c8a96e",
+            resources: { gold: 300 + Math.floor(Math.random() * 700), food: 50000 + Math.floor(Math.random() * 50000), iron: 100 + Math.floor(Math.random() * 300), wood: 100 + Math.floor(Math.random() * 200), oil: 0 },
+            buildings: { townhall: 1, barracks: 0, village: 1, market: 1, university: 1, bank: 0, factory: 0 },
+            scientists: 5 + Math.floor(Math.random() * 20), sciences: { forestry: 0, mining: 0, ironMining: 0 },
+            army: { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 },
+            general: { hired: false, name: "", skill: 0, exp: 0 },
+            land: { total: 400 + Math.floor(Math.random() * 600), mountains: 50, forests: 100, plains: 250 },
+            homeBaseIndex: idx, captured: false, squads: [], nextSquadId: 0, farms: [],
+            botNextAction: {}, botRecruitCd: 0, starvationTurns: 0, captures: 0, turnsAlive: 0,
+            isDesert: true, allyId: null, oilFields: [], immunityTurns: 0, workers: 50
+        };
+        state.enemyCountries.push(desert);
+        getCellAt(idx).objects.push({ type: 'country_base', id: desert.id });
+    }
+
+    for (let i = botCount + desertCount; i < allIndices.length; i++) {
+        const idx = allIndices[i];
+        const cell = getCellAt(idx);
+        if (!cell) continue;
+        const r = Math.random();
+        if (r < 0.25) {
+            cell.objects.push({ type: 'swamp' });
+        } else if (r < 0.40) {
+            const tankCount = Math.floor(Math.random() * (3000 - 50 + 1)) + 50;
+            const garrisonId = 'garrison_init_' + idx;
+            cell.objects.push({ type: 'garrison', id: garrisonId, tanks: tankCount, defeated: false });
+        } else if (r < 0.56) {
+            const colonyId = state.colonies.length > 0 ? Math.max(...state.colonies.map(c => c.id)) + 1 : i;
+            const colonyType = Math.random() < 0.5 ? 'resource' : 'fortress';
+            const newColony = { id: colonyId, position: idx, type: colonyType, ownerId: null, lifespan: COLONY_LIFESPAN, name: `Колония ${colonyType === 'resource' ? 'Р' : 'К'}-${colonyId}` };
+            state.colonies.push(newColony);
+            cell.objects.push({ type: 'colony', id: colonyId });
+        }
+    }
+}
+
+function spawnBotCountry() {
+    const emptyCells = state.worldMap.cells.filter(c => c.objects.length === 0);
+    let newCountryIndex;
+    if (emptyCells.length > 0) {
+        newCountryIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)].index;
+    } else {
+        let currentMaxIndex = state.worldMap.cells.length - 1;
+        newCountryIndex = currentMaxIndex + 1;
+        state.worldMap.cells.push({ index: newCountryIndex, objects: [] });
+        for (let i = 1; i <= 3; i++) state.worldMap.cells.push({ index: newCountryIndex + i, objects: [] });
+    }
+
+    let cName = generateBotCountryName();
+    const colorIdx = Math.floor(Math.random() * COUNTRY_COLORS.length);
+    const startArmy = randomStartingArmy();
+
+    const country = {
+        id: state.enemyCountries.length > 0 ? Math.max(...state.enemyCountries.map(c => c.id)) + 1 : 0,
+        name: cName, color: COUNTRY_COLORS[colorIdx],
+        resources: { gold: 400, food: 18000000, iron: 90, wood: 200, oil: 0 },
+        buildings: { townhall: 1, barracks: 1, village: 1, market: 1, university: 1, bank: 0, factory: 0 },
+        scientists: 10 + Math.floor(Math.random() * 20), sciences: { forestry: 0, mining: 0, ironMining: 0 },
+        army: startArmy,
+        general: { hired: true, name: `Генерал ${cName.split(' ')[0]}`, skill: 1 + Math.floor(Math.random() * 2), exp: 0 },
+        land: { total: 700, mountains: 120, forests: 180, plains: 400 }, farms: [],
+        homeBaseIndex: newCountryIndex, captured: false, squads: [], nextSquadId: 0,
+        botNextAction: {}, botRecruitCd: 0, starvationTurns: 0, captures: 0, turnsAlive: 0,
+        allyId: null, oilFields: [], immunityTurns: 5, workers: 200
+    };
+    while (!isGeneralNameUnique(country.general.name, false)) { country.general.name = `Генерал ${cName.split(' ')[0]}${Math.floor(Math.random() * 100)}`; }
+
+    const squad = {
+        id: country.nextSquadId++, name: generateBotSquadName(), ownerId: country.id, position: country.homeBaseIndex,
+        army: { infantry: 50, cavalry: 10, shooters: 10, tanks: 0 },
+        artifacts: [], capturingColony: null, capturingCountry: null, hasRaidedThisTurn: false, wins: 0
+    };
+    country.squads.push(squad);
+    getCellAt(squad.position).objects.push({ type: 'squad_enemy', squadId: squad.id, ownerId: country.id });
+
+    state.enemyCountries.push(country);
+    getCellAt(newCountryIndex).objects.push({ type: 'country_base', id: country.id });
+    log(`На горизонте появилась новая страна: <span style="color:${country.color}">${country.name}</span> в секторе ${newCountryIndex}!`);
+
+    state.nextBotSpawnTurn = state.turn + Math.floor(Math.random() * 13) + 3;
+    render();
+}
+
+// Изм. #7: powerMultiplier 1.2x (было 2x), spawn rate 0.075 (было 0.15)
+function spawnTitanCountry() {
+    const emptyCells = state.worldMap.cells.filter(c => c.objects.length === 0);
+    let newCountryIndex;
+    if (emptyCells.length > 0) {
+        newCountryIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)].index;
+    } else {
+        let currentMaxIndex = state.worldMap.cells.length - 1;
+        newCountryIndex = currentMaxIndex + 1;
+        state.worldMap.cells.push({ index: newCountryIndex, objects: [] });
+        for (let i = 1; i <= 5; i++) state.worldMap.cells.push({ index: newCountryIndex + i, objects: [] });
+    }
+
+    if (!state.nextTitanNumber) state.nextTitanNumber = 1;
+    const titanNum = state.nextTitanNumber;
+    const powerMultiplier = Math.pow(1.2, titanNum - 1);
+
+    const titanNameKey = TITAN_NAMES[(titanNum - 1) % TITAN_NAMES.length];
+    const tName = "Титан " + titanNum + ": " + titanNameKey;
+    state.nextTitanNumber++;
+
+    const titanColor = "#000000";
+    const generalSkill = 200 + (titanNum - 1) * 100;
+    const generalExp = 20000 + (titanNum - 1) * 10000;
+
+    const country = {
+        id: state.enemyCountries.length > 0 ? Math.max(...state.enemyCountries.map(c => c.id)) + 1 : 500,
+        name: tName, color: titanColor,
+        resources: { gold: 50000 * powerMultiplier, food: 50000000 * powerMultiplier, iron: 10000 * powerMultiplier, wood: 5000 * powerMultiplier, oil: 5000 * powerMultiplier },
+        buildings: { townhall: 1, barracks: 1, village: 1, market: 1, university: 1, bank: 1, factory: 1 },
+        scientists: 500 * powerMultiplier,
+        sciences: { forestry: 100, mining: 100, ironMining: 100 },
+        army: {
+            infantry: Math.floor((1000 + Math.floor(Math.random() * 14001)) * powerMultiplier),
+            cavalry: Math.floor((1000 + Math.floor(Math.random() * 14001)) * powerMultiplier),
+            shooters: Math.floor((1000 + Math.floor(Math.random() * 14001)) * powerMultiplier),
+            tanks: Math.floor((1000 + Math.floor(Math.random() * 29001)) * powerMultiplier)
+        },
+        general: { hired: true, name: `Владыка ${titanNameKey}`, skill: generalSkill, exp: generalExp },
+        land: { total: 5000, mountains: 1000, forests: 1000, plains: 3000 }, farms: [],
+        homeBaseIndex: newCountryIndex, captured: false, squads: [], nextSquadId: 0,
+        botNextAction: {}, botRecruitCd: 0, starvationTurns: 0, captures: 0, turnsAlive: 0,
+        isTitan: true, allyId: null, oilFields: [], immunityTurns: 0, workers: 1000
+    };
+
+    const numTitanSquads = 1 + Math.floor(Math.random() * 2);
+    for (let sq = 0; sq < numTitanSquads; sq++) {
+        const hasBoots = sq === 0 || Math.random() < 0.5;
+        const squadArmy = {
+            infantry: Math.floor(country.army.infantry / numTitanSquads),
+            cavalry: Math.floor(country.army.cavalry / numTitanSquads),
+            shooters: Math.floor(country.army.shooters / numTitanSquads),
+            tanks: Math.floor(country.army.tanks / numTitanSquads)
+        };
+        const titanSquad = {
+            id: country.nextSquadId++,
+            name: sq === 0 ? "Легион Смерти " + titanNum : "Орда Разрушения " + titanNum,
+            ownerId: country.id, position: newCountryIndex, army: squadArmy,
+            artifacts: hasBoots ? ['levitation_boots'] : [],
+            capturingColony: null, capturingCountry: null, capturingOilField: null, hasRaidedThisTurn: false, wins: 0
+        };
+        country.squads.push(titanSquad);
+        getCellAt(newCountryIndex).objects.push({ type: 'squad_enemy', squadId: titanSquad.id, ownerId: country.id });
+    }
+    country.army = { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 };
+
+    state.enemyCountries.push(country);
+    getCellAt(newCountryIndex).objects.push({ type: 'country_base', id: country.id });
+
+    log(`❗ <span class="loss" style="font-size: 1.2em;"><b>ВНИМАНИЕ: Пробудился ${tName}!</b></span> Мощь ×${powerMultiplier.toFixed(1)}, навык генерала: ${generalSkill}.`);
+    render();
+}
+
+function spawnDesertTerritory() {
+    const emptyCells = state.worldMap.cells.filter(cell => cell.objects.length === 0);
+    if (emptyCells.length === 0) return;
+    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    const dName = "Пустыня-" + state.turn + "-" + Math.floor(Math.random() * 100);
+    const desertId = state.enemyCountries.length > 0 ? Math.max(...state.enemyCountries.map(c => c.id)) + 1 : 100;
+    const desert = {
+        id: desertId, name: dName, color: "#c8a96e",
+        resources: { gold: 300 + Math.floor(Math.random() * 700), food: 50000 + Math.floor(Math.random() * 50000), iron: 100 + Math.floor(Math.random() * 300), wood: 100 + Math.floor(Math.random() * 200), oil: 0 },
+        buildings: { townhall: 1, barracks: 0, village: 1, market: 1, university: 1, bank: 0, factory: 0 },
+        scientists: 5 + Math.floor(Math.random() * 20), sciences: { forestry: 0, mining: 0, ironMining: 0 },
+        army: { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 },
+        general: { hired: false, name: "", skill: 0, exp: 0 },
+        land: { total: 400 + Math.floor(Math.random() * 600), mountains: 50, forests: 100, plains: 250 },
+        homeBaseIndex: randomCell.index, captured: false, squads: [], nextSquadId: 0, farms: [],
+        botNextAction: {}, botRecruitCd: 0, starvationTurns: 0, captures: 0, turnsAlive: 0,
+        isDesert: true, allyId: null, oilFields: [], immunityTurns: 0, workers: 50
+    };
+    state.enemyCountries.push(desert);
+    randomCell.objects.push({ type: 'country_base', id: desert.id });
+}
+
+function spawnGarrison() {
+    const emptyCells = state.worldMap.cells.filter(cell => cell.objects.length === 0);
+    if (emptyCells.length === 0) return;
+    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    const tankCount = Math.floor(Math.random() * (3000 - 50 + 1)) + 50;
+    const garrisonId = 'garrison_' + state.turn + '_' + Math.floor(Math.random() * 1000);
+    randomCell.objects.push({ type: 'garrison', id: garrisonId, tanks: tankCount, defeated: false });
+    log(`🏰 В секторе ${randomCell.index} появился гарнизон с ${tankCount} танками!`);
+}
+
+function spawnSwamp() {
+    const emptyCells = state.worldMap.cells.filter(cell => cell.objects.length === 0);
+    if (emptyCells.length === 0) return;
+    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    randomCell.objects.push({ type: 'swamp' });
+}
+
+function spawnTitan() {
+    const emptyCells = state.worldMap.cells.filter(c => c.objects.length === 0);
+    if (emptyCells.length === 0) return;
+    const titanCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    const titanId = 'titan_' + state.turn + '_' + Math.floor(Math.random() * 1000);
+    const titan = { type: 'titan', id: titanId, name: `Титан-${state.turn}`, army: { ...TITAN_ARMY_COMPOSITION }, defeated: false };
+    titanCell.objects.push(titan);
+    log(`👹 В секторе ${titanCell.index} появился могучий <b>Титан</b>!`);
+}
+
+function processTitanObjects() {
+    for (const cell of state.worldMap.cells) {
+        const titanObj = cell.objects.find(o => o.type === 'titan' && !o.defeated);
+        if (!titanObj) continue;
+        if (Math.random() < 0.6) {
+            const step = (Math.random() < 0.5 ? -1 : 1) * (1 + Math.floor(Math.random() * 5));
+            const newIdx = cell.index + step;
+            const newCell = getCellAt(newIdx);
+            if (newCell) {
+                cell.objects = cell.objects.filter(o => o !== titanObj);
+                const playerSquadsInNew = newCell.objects.filter(o => o.type === 'squad_player');
+                for (const pso of playerSquadsInNew) {
+                    const pSquad = state.squads.find(s => s.id === pso.squadId);
+                    if (pSquad) resolveTitanBattle(pSquad, titanObj, newCell, true);
+                    if (titanObj.army.infantry + titanObj.army.cavalry + titanObj.army.shooters + titanObj.army.tanks <= 0) break;
+                }
+                if (titanObj.army.infantry + titanObj.army.cavalry + titanObj.army.shooters + titanObj.army.tanks > 0) {
+                    newCell.objects.push(titanObj);
+                }
+            }
+        }
+    }
+}
+
+// Изм. #9: колония появляется в 2 раза чаще (0.16)
+function spawnNewColonyInEmptyCell() {
+    const emptyCells = state.worldMap.cells.filter(cell => cell.objects.length === 0);
+    if (emptyCells.length === 0) return;
+    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    const colonyId = state.colonies.length > 0 ? Math.max(...state.colonies.map(c => c.id)) + 1 : 0;
+    const colonyType = Math.random() < 0.5 ? 'resource' : 'fortress';
+    const newColony = { id: colonyId, position: randomCell.index, type: colonyType, ownerId: null, lifespan: COLONY_LIFESPAN, name: `Колония ${colonyType === 'resource' ? 'Р' : 'К'}-${colonyId}` };
+    state.colonies.push(newColony);
+    getCellAt(randomCell.index).objects.push({ type: 'colony', id: colonyId });
+}
+
+function pickRandomArtifact(extraChanceUniversity = false) {
+    const baseChance = extraChanceUniversity ? 0.40 : 0.25;
+    if (Math.random() >= baseChance) return null;
+    const roll = Math.random();
+    let cumulative = 0;
+    const regularKeys = Object.keys(ARTIFACTS).filter(k => !TITAN_ARTIFACT_KEYS.includes(k));
+    for (const key of regularKeys) {
+        cumulative += ARTIFACTS[key].chance;
+        if (roll < cumulative) return key;
+    }
+    return regularKeys[0];
+}
+
+function rollForArtifact(entityName, entityState, squadRef = null, isUniversity = false) {
+    const artKey = pickRandomArtifact(isUniversity);
+    if (artKey !== null) {
+        const art = ARTIFACTS[artKey];
+        if (entityState === state) {
+            if (!state.unknownArtifacts) state.unknownArtifacts = [];
+            const unknownId = Date.now() + Math.floor(Math.random() * 10000);
+            const targetSquadId = squadRef ? squadRef.id : (state.squads[0] ? state.squads[0].id : null);
+            if (targetSquadId !== null) {
+                state.unknownArtifacts.push({ id: unknownId, artKey: artKey, squadId: targetSquadId, researchTurnsLeft: 0, researching: false });
+                log(`🏺 <b>${entityName}</b> нашёл <b>Неизвестный Артефакт</b>! Исследуйте его в Университете.`);
+            } else {
+                entityState.resources.gold += 1500;
+                log(`🏺 <b>${entityName}</b> нашёл Артефакт, но нет отряда. Получено: 1500💰.`);
+            }
+        } else {
+            if (squadRef) {
+                if (!squadRef.artifacts) squadRef.artifacts = [];
+                squadRef.artifacts.push(artKey);
+                applyArtifactEffect(artKey, squadRef, entityState);
+            } else {
+                entityState.resources.gold += 500;
+            }
+        }
+    }
+}
+
+function applyArtifactEffect(artKey, squad, ownerState) {
+    if (artKey === 'goblin_ring') {
+        const gen = ownerState === state ? state.general : ownerState.general;
+        if (gen && gen.hired) { gen.skill += 100; }
+    }
+    // Изм. #8: эффекты титановых артефактов применяются в getArmyPower
+    if (artKey === 'titan_halberd') {
+        const gen = ownerState === state ? state.general : ownerState.general;
+        if (gen && gen.hired) { gen.skill += 200000; log(`⚔️ Титановая алебарда: генерал получил +200000 навыка!`); }
+    }
+}
+
+// Изм. #8: проверка комплекта титановых артефактов
+function hasTitanSet(squad) {
+    if (!squad.artifacts) return false;
+    return TITAN_ARTIFACT_KEYS.every(k => squad.artifacts.includes(k));
+}
+
+function countTotalCountries() { return state.enemyCountries.filter(c => !c.captured).length; }
+function countTotalArtifacts() {
+    let count = 0;
+    state.squads.forEach(s => { if (s.artifacts) count += s.artifacts.length; });
+    state.enemyCountries.forEach(c => c.squads.forEach(s => { if (s.artifacts) count += s.artifacts.length; }));
+    return count;
+}
+
+// Изм. #13: ядерный удар передаёт ресурсы и землю захватчику
+function useAtomicBomb(squadId, countryId) {
+    const squad = state.squads.find(s => s.id === squadId); if (!squad) return;
+    const artIdx = squad.artifacts.indexOf('atomic_bomb'); if (artIdx === -1) return;
+    const country = state.enemyCountries.find(c => c.id === countryId); if (!country || country.captured) return;
+    squad.artifacts.splice(artIdx, 1);
+
+    // Передача ресурсов, земли и учёных
+    state.resources.gold += country.resources.gold;
+    state.resources.food += country.resources.food;
+    state.resources.iron += country.resources.iron;
+    state.resources.wood += (country.resources.wood || 0);
+    state.resources.oil += (country.resources.oil || 0);
+    state.scientists += country.scientists;
+    state.land.total += country.land.total;
+    state.land.mountains += country.land.mountains;
+    state.land.forests += country.land.forests;
+    state.land.plains += country.land.plains;
+
+    country.captured = true; country.squads = [];
+    const baseCell = getCellAt(country.homeBaseIndex);
+    if (baseCell) baseCell.objects = baseCell.objects.filter(o => o.type !== 'country_base' || o.id !== country.id);
+    log(`☢️ <span class="victory">ЯДЕРНЫЙ УДАР! ${country.name} уничтожена! Получены все ресурсы и земли.</span>`);
+    render();
+}
+
+function useLevitationBoots(squadId, targetIndex) {
+    const squad = state.squads.find(s => s.id === squadId); if (!squad) return;
+    const cell = getCellAt(targetIndex); if (!cell) return alert("Некорректный сектор!");
+    const artIdx = squad.artifacts.indexOf('levitation_boots'); if (artIdx === -1) return;
+    const oldCell = getCellAt(squad.position);
+    if (oldCell) oldCell.objects = oldCell.objects.filter(o => o.squadId !== squad.id || o.type !== 'squad_player');
+    squad.artifacts.splice(artIdx, 1);
+    squad.position = targetIndex;
+    cell.objects.push({ type: 'squad_player', squadId: squad.id });
+    log(`🥾 Отряд "${squad.name}" телепортировался в сектор ${targetIndex}!`);
+    state.focusSector = targetIndex; render();
+}
+
+// Изм. #8: Титановый бахил — телепортация, не тратится
+function useTitanBoot(squadId, targetIndex) {
+    const squad = state.squads.find(s => s.id === squadId); if (!squad) return;
+    const cell = getCellAt(targetIndex); if (!cell) return alert("Некорректный сектор!");
+    if (!squad.artifacts.includes('titan_boot')) return;
+    const oldCell = getCellAt(squad.position);
+    if (oldCell) oldCell.objects = oldCell.objects.filter(o => o.squadId !== squad.id || o.type !== 'squad_player');
+    squad.position = targetIndex;
+    cell.objects.push({ type: 'squad_player', squadId: squad.id });
+    log(`👡 Титановый бахил: Отряд "${squad.name}" телепортировался в сектор ${targetIndex}!`);
+    state.focusSector = targetIndex; render();
+}
+
+function botUseArtifacts(country) {
+    for (const squad of country.squads) {
+        if (!squad.artifacts) continue;
+        if (squad.artifacts.includes('levitation_boots')) {
+            if (country.isTitan) {
+                const r = Math.random();
+                let targetIdx;
+                if (r < 0.4) { targetIdx = state.homeBaseIndex; }
+                else if (r < 0.7) {
+                    const aliveBots = state.enemyCountries.filter(c => !c.captured && c.id !== country.id);
+                    if (aliveBots.length > 0) targetIdx = aliveBots[Math.floor(Math.random() * aliveBots.length)].homeBaseIndex;
+                    else targetIdx = state.homeBaseIndex;
+                } else { targetIdx = Math.floor(Math.random() * state.worldMap.cells.length); }
+                const oldCell = getCellAt(squad.position);
+                if (oldCell) oldCell.objects = oldCell.objects.filter(o => !(o.type === 'squad_enemy' && o.squadId === squad.id));
+                squad.position = targetIdx;
+                const newCell = getCellAt(targetIdx);
+                if (newCell) newCell.objects.push({ type: 'squad_enemy', squadId: squad.id, ownerId: country.id });
+                const idx = squad.artifacts.indexOf('levitation_boots');
+                squad.artifacts.splice(idx, 1);
+                log(`👹 Легион ${country.name} телепортировался в сектор ${targetIdx}!`);
+            } else {
+                const oldCell = getCellAt(squad.position);
+                if (oldCell) oldCell.objects = oldCell.objects.filter(o => !(o.type === 'squad_enemy' && o.squadId === squad.id));
+                squad.position = state.homeBaseIndex;
+                const newCell = getCellAt(state.homeBaseIndex);
+                if (newCell) newCell.objects.push({ type: 'squad_enemy', squadId: squad.id, ownerId: country.id });
+                const idx = squad.artifacts.indexOf('levitation_boots');
+                squad.artifacts.splice(idx, 1);
+                log(`🥾 Отряд "${squad.name}" (${country.name}) телепортировался к вашей базе!`);
+            }
+        }
+    }
+}
+
+function processFarms(entity) {
+    if (!entity.farms) entity.farms = [];
+    let foodGained = 0;
+    for (let i = entity.farms.length - 1; i >= 0; i--) {
+        let farm = entity.farms[i]; farm.turnsActive++;
+        if (farm.turnsActive > 3 && farm.turnsActive <= 8) foodGained += 500;
+        else if (farm.turnsActive > 8 && farm.turnsActive <= 13) foodGained += 400;
+        else if (farm.turnsActive > 13 && farm.turnsActive <= 18) foodGained += 300;
+        else if (farm.turnsActive > 18) { entity.farms.splice(i, 1); }
+    }
+    const foodBonus = entity === state ? (state.foodBonus || 0) : 0;
+    entity.resources.food += Math.floor(foodGained * (1 + foodBonus));
+}
+
+function processOilFields(entity, entityName) {
+    if (!entity.oilFields) entity.oilFields = [];
+    const oilBonus = entity === state ? (state.oilBonus || 0) : 0;
+    for (let i = entity.oilFields.length - 1; i >= 0; i--) {
+        const field = entity.oilFields[i];
+        if (field.developTurnsLeft > 0) {
+            // Изм. #14: рабочие ускоряют разработку
+            const workerAccel = Math.floor((field.assignedWorkers || 0) / 100);
+            const reduction = 1 + workerAccel;
+            field.developTurnsLeft = Math.max(0, field.developTurnsLeft - reduction);
+            if (field.developTurnsLeft <= 0) {
+                field.capacity = 300 + Math.floor(Math.random() * 1701);
+                field.accumulated = 0;
+                field.developed = true;
+                log(`⛽ Месторождение (сектор ${field.cellIndex}) разработано! Ёмкость: ${field.capacity}. Владелец: ${entityName}`);
+            }
+        } else if (field.developed) {
+            const gain = Math.min(Math.floor(100 * (1 + oilBonus)), field.capacity - field.accumulated);
+            if (gain > 0) { field.accumulated += gain; entity.resources.oil = (entity.resources.oil || 0) + gain; }
+            if (field.accumulated >= field.capacity) {
+                log(`⛽ Месторождение в секторе ${field.cellIndex} (${entityName}) исчерпано!`);
+                entity.oilFields.splice(i, 1);
+                const cell = getCellAt(field.cellIndex);
+                if (cell) cell.objects = cell.objects.filter(o => !(o.type === 'oil_field'));
+            }
+        }
+    }
+}
+
+// Изм. #32: s4=25; изм. #4: генерал страновой (не привязан к отряду)
+function getArmyPower(inf, cav, sho, general, tanks, squadRef) {
+    const s1 = 1.0;
+    const s2 = squadRef && squadRef.artifacts && squadRef.artifacts.includes('titan_horseshoe') ? 9.0 : 1.8;
+    const s3 = squadRef && squadRef.artifacts && squadRef.artifacts.includes('grouse_bowstring') ? 5.0 : 2.8;
+    const s4 = 25.0;
+
+    let power = inf * s1 + cav * s2 + sho * s3 + (tanks || 0) * s4;
+
+    if (general && general.hired) {
+        let bonus = 1 + general.skill * 0.01;
+        if (squadRef && squadRef.artifacts && squadRef.artifacts.includes('goblin_ring')) bonus += 100 * 0.01;
+        power *= bonus;
+    }
+
+    // Изм. #8: Титановая кираса
+    if (squadRef && squadRef.artifacts && squadRef.artifacts.includes('titan_cuirass')) power *= 1.3;
+
+    // Изм. #35: бонус звания
+    const rank = getSquadRank(squadRef || { wins: 0 });
+    power *= rank.bonus;
+
+    // Изм. #8: комплект Титана — эффект набора
+    if (squadRef && hasTitanSet(squadRef)) {
+        power *= 3.0;
+    }
+
+    return power;
+}
+
+function recordTopBattle(squad1Name, squad2Name, totalExp) {
+    if (!state.topBattles) state.topBattles = [];
+    state.topBattles.push({ squad1: squad1Name, squad2: squad2Name, totalExp, turn: state.turn });
+    state.topBattles.sort((a, b) => b.totalExp - a.totalExp);
+    if (state.topBattles.length > 5) state.topBattles = state.topBattles.slice(0, 5);
+}
+
+// Изм. #34: двусторонние потери; изм. #3: опыт при поражении; изм. #35: учёт побед
+function resolveBattle(squad1, squad2, country1_owner, country2_owner) {
+    // Изм. #4: генерал страновой — всегда применяется если нанят
+    const gen1 = country1_owner === state ? (state.general.hired ? state.general : null) : (country1_owner.general.hired ? country1_owner.general : null);
+    const gen2 = country2_owner === state ? (state.general.hired ? state.general : null) : (country2_owner.general.hired ? country2_owner.general : null);
+
+    const inf1 = squad1.army.infantry; const cav1 = squad1.army.cavalry; const sho1 = squad1.army.shooters; const tan1 = squad1.army.tanks || 0;
+    const inf2 = squad2.army.infantry; const cav2 = squad2.army.cavalry; const sho2 = squad2.army.shooters; const tan2 = squad2.army.tanks || 0;
+
+    const P1 = getArmyPower(inf1, cav1, sho1, gen1, tan1, squad1);
+    const P2 = getArmyPower(inf2, cav2, sho2, gen2, tan2, squad2);
+
+    // Случайность ±15%
+    const rand1 = 0.85 + Math.random() * 0.30;
+    const rand2 = 0.85 + Math.random() * 0.30;
+    const adjP1 = P1 * rand1;
+    const adjP2 = P2 * rand2;
+
+    const winner = adjP1 >= adjP2 ? 'player' : 'enemy';
+
+    // Изм. #34: обе стороны несут потери одновременно
+    const coeff = 0.7;
+    const lossRatio1 = P2 > 0 && P1 > 0 ? (adjP2 / adjP1) * coeff : (winner === 'enemy' ? 1.0 : 0.1);
+    const lossRatio2 = P1 > 0 && P2 > 0 ? (adjP1 / adjP2) * coeff : (winner === 'player' ? 1.0 : 0.1);
+
+    const losses1 = {
+        infantry: Math.floor(inf1 * Math.min(lossRatio1, winner === 'enemy' ? 1 : 0.9)),
+        cavalry: Math.floor(cav1 * Math.min(lossRatio1, winner === 'enemy' ? 1 : 0.9)),
+        shooters: Math.floor(sho1 * Math.min(lossRatio1, winner === 'enemy' ? 1 : 0.9)),
+        tanks: Math.floor(tan1 * Math.min(lossRatio1 * 0.3, winner === 'enemy' ? 1 : 0.5))
+    };
+    const losses2 = {
+        infantry: Math.floor(inf2 * Math.min(lossRatio2, winner === 'player' ? 1 : 0.9)),
+        cavalry: Math.floor(cav2 * Math.min(lossRatio2, winner === 'player' ? 1 : 0.9)),
+        shooters: Math.floor(sho2 * Math.min(lossRatio2, winner === 'player' ? 1 : 0.9)),
+        tanks: Math.floor(tan2 * Math.min(lossRatio2 * 0.3, winner === 'player' ? 1 : 0.5))
+    };
+
+    if (country1_owner === state) { state.globalStats.lostTroops += losses1.infantry + losses1.cavalry + losses1.shooters; state.globalStats.killedTroops += losses2.infantry + losses2.cavalry + losses2.shooters; }
+    else if (country2_owner === state) { state.globalStats.lostTroops += losses2.infantry + losses2.cavalry + losses2.shooters; state.globalStats.killedTroops += losses1.infantry + losses1.cavalry + losses1.shooters; }
+
+    const helmBonus1 = squad1.artifacts && squad1.artifacts.includes('titan_helmet') ? 1.3 : 1;
+    const helmBonus2 = squad2.artifacts && squad2.artifacts.includes('titan_helmet') ? 1.3 : 1;
+
+    // Изм. #3: опыт начисляется обеим сторонам в любом случае
+    const expGainedFor1 = Math.floor(((losses2.infantry * 5) + (losses2.cavalry * 8) + (losses2.shooters * 10) + (losses2.tanks * 50)) * helmBonus1);
+    const expGainedFor2 = Math.floor(((losses1.infantry * 5) + (losses1.cavalry * 8) + (losses1.shooters * 10) + (losses1.tanks * 50)) * helmBonus2);
+
+    const totalBattleExp = expGainedFor1 + expGainedFor2;
+    if (totalBattleExp > 0) {
+        recordTopBattle(
+            squad1.name + ' (' + (country1_owner === state ? state.name : country1_owner.name) + ')',
+            squad2.name + ' (' + (country2_owner === state ? state.name : country2_owner.name) + ')',
+            totalBattleExp
+        );
+    }
+
+    // Изм. #35: победитель получает +1 win
+    if (winner === 'player') { squad1.wins = (squad1.wins || 0) + 1; }
+    else { squad2.wins = (squad2.wins || 0) + 1; }
+
+    return { winner, losses1, losses2, expGainedFor1, expGainedFor2 };
+}
+
+function resolveTitanBattle(squad, titan, cell, isPlayerSquad) {
+    const titanArmy = titan.army;
+    const titanSquadObj = { army: { ...titanArmy }, artifacts: [], wins: 0 };
+
+    const attackerGeneral = isPlayerSquad && state.general.hired ? state.general : null;
+
+    const P_attacker = getArmyPower(squad.army.infantry, squad.army.cavalry, squad.army.shooters, attackerGeneral, squad.army.tanks, squad);
+    const P_titan = getArmyPower(titanArmy.infantry, titanArmy.cavalry, titanArmy.shooters, null, titanArmy.tanks, titanSquadObj);
+
+    const rand1 = 0.85 + Math.random() * 0.30;
+    const rand2 = 0.85 + Math.random() * 0.30;
+    const winner = P_attacker * rand1 > P_titan * rand2 ? 'attacker' : 'titan';
+
+    let lossesAttacker = { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 };
+    let lossesTitan = { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 };
+
+    const coeff = 0.7;
+    if (winner === 'attacker') {
+        const K = P_attacker > 0 ? (P_titan / P_attacker) * coeff : 0;
+        lossesAttacker = { infantry: Math.floor(squad.army.infantry * K), cavalry: Math.floor(squad.army.cavalry * K), shooters: Math.floor(squad.army.shooters * K), tanks: Math.floor((squad.army.tanks || 0) * K * 0.3) };
+        lossesTitan = { ...titanArmy };
+    } else {
+        const K = P_titan > 0 ? (P_attacker / P_titan) * coeff : 0;
+        lossesTitan = { infantry: Math.floor(titanArmy.infantry * K), cavalry: Math.floor(titanArmy.cavalry * K), shooters: Math.floor(titanArmy.shooters * K), tanks: Math.floor((titanArmy.tanks || 0) * K * 0.3) };
+        lossesAttacker = { infantry: squad.army.infantry, cavalry: squad.army.cavalry, shooters: squad.army.shooters, tanks: squad.army.tanks || 0 };
+    }
+
+    // Изм. #8: Знамя победы — воскрешение 30% при победе
+    if (winner === 'attacker' && isPlayerSquad && squad.artifacts && squad.artifacts.includes('titan_banner')) {
+        lossesAttacker.infantry = Math.floor(lossesAttacker.infantry * 0.7);
+        lossesAttacker.cavalry = Math.floor(lossesAttacker.cavalry * 0.7);
+        lossesAttacker.shooters = Math.floor(lossesAttacker.shooters * 0.7);
+    }
+
+    squad.army.infantry = Math.max(0, squad.army.infantry - lossesAttacker.infantry);
+    squad.army.cavalry = Math.max(0, squad.army.cavalry - lossesAttacker.cavalry);
+    squad.army.shooters = Math.max(0, squad.army.shooters - lossesAttacker.shooters);
+    squad.army.tanks = Math.max(0, (squad.army.tanks || 0) - lossesAttacker.tanks);
+
+    const helmBonus = squad.artifacts && squad.artifacts.includes('titan_helmet') ? 1.3 : 1;
+    const expGainedAttacker = Math.floor(((lossesTitan.infantry * 5) + (lossesTitan.cavalry * 8) + (lossesTitan.shooters * 10) + (lossesTitan.tanks * 50)) * helmBonus);
+
+    // Изм. #3: опыт при любом исходе
+    if (isPlayerSquad && state.general.hired) {
+        state.general.exp += expGainedAttacker;
+    }
+
+    if (winner === 'attacker') {
+        titan.defeated = true;
+        titan.army = { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 };
+        if (isPlayerSquad) {
+            squad.wins = (squad.wins || 0) + 1;
+            log(`👹 <span class="victory">Отряд "${squad.name}" победил Титана! Опыт генерала +${expGainedAttacker}.</span>`);
+            // Изм. #8: Трофеи Титана
+            rollTitanTrophies(squad);
+        }
+    } else {
+        if (isPlayerSquad) {
+            log(`👹 <span class="loss">Отряд "${squad.name}" потерпел поражение от Титана.</span> Генерал получил ${expGainedAttacker} опыта.`);
+            if (squad.army.infantry + squad.army.cavalry + squad.army.shooters + (squad.army.tanks || 0) <= 0) {
+                const c = getCellAt(squad.position);
+                if (c) c.objects = c.objects.filter(o => o.squadId !== squad.id || o.type !== 'squad_player');
+                state.squads = state.squads.filter(s => s.id !== squad.id);
+                return { isSquadDestroyed: true };
+            }
+        }
+    }
+    return { winner, isSquadDestroyed: false };
+}
+
+// Изм. #8: выдача трофеев после убийства отряда Титана
+function rollTitanTrophies(squad) {
+    const trophies = [
+        { key: 'titan_halberd', chance: 0.15 },
+        { key: 'titan_cuirass', chance: 0.15 },
+        { key: 'titan_boot', chance: 0.05 },
+        { key: 'titan_horseshoe', chance: 0.15 },
+        { key: 'titan_helmet', chance: 0.10 },
+        { key: 'titan_banner', chance: 0.10 },
+    ];
+    let gained = [];
+    for (const t of trophies) {
+        if (Math.random() < t.chance) {
+            if (!squad.artifacts) squad.artifacts = [];
+            squad.artifacts.push(t.key);
+            applyArtifactEffect(t.key, squad, state);
+            gained.push(ARTIFACTS[t.key].icon + ' ' + ARTIFACTS[t.key].name);
+        }
+    }
+    if (gained.length > 0) {
+        log(`🏆 <span class="victory">Трофеи Титана: ${gained.join(', ')}!</span>`);
+        if (hasTitanSet(squad)) {
+            log(`🌟 <span class="victory">КОМПЛЕКТ ТИТАНА СОБРАН! Отряд "${squad.name}" получает ×3 к силе навсегда!</span>`);
+        }
+    }
+}
+
+function resolveGarrisonBattle(squad, garrison, cell, isPlayerSquad) {
+    const tanksInGarrison = garrison.tanks || 0;
+    const garrisonSquadRef = { army: { infantry: 0, cavalry: 0, shooters: 0, tanks: tanksInGarrison }, artifacts: [], wins: 0 };
+
+    const attackerGeneral = isPlayerSquad && state.general.hired ? state.general : null;
+
+    const P_attacker = getArmyPower(squad.army.infantry, squad.army.cavalry, squad.army.shooters, attackerGeneral, squad.army.tanks, squad);
+    const P_garrison = getArmyPower(0, 0, 0, null, tanksInGarrison, garrisonSquadRef);
+
+    const rand1 = 0.85 + Math.random() * 0.30;
+    const rand2 = 0.85 + Math.random() * 0.30;
+    const winner = P_attacker * rand1 >= P_garrison * rand2 ? 'attacker' : 'garrison';
+
+    let lossesAttacker = { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 };
+    let lossesGarrison = { tanks: 0 };
+
+    const coeff = 0.7;
+    if (winner === 'attacker') {
+        const K = P_attacker > 0 ? (P_garrison / P_attacker) * coeff : 0;
+        lossesAttacker = { infantry: Math.floor(squad.army.infantry * K), cavalry: Math.floor(squad.army.cavalry * K), shooters: Math.floor(squad.army.shooters * K), tanks: Math.floor((squad.army.tanks || 0) * K * 0.3) };
+        lossesGarrison = { tanks: tanksInGarrison };
+    } else {
+        const K = P_garrison > 0 ? (P_attacker / P_garrison) * coeff : 0;
+        lossesGarrison = { tanks: Math.floor(tanksInGarrison * K * 0.3) };
+        lossesAttacker = { infantry: squad.army.infantry, cavalry: squad.army.cavalry, shooters: squad.army.shooters, tanks: squad.army.tanks || 0 };
+    }
+
+    squad.army.infantry = Math.max(0, squad.army.infantry - lossesAttacker.infantry);
+    squad.army.cavalry = Math.max(0, squad.army.cavalry - lossesAttacker.cavalry);
+    squad.army.shooters = Math.max(0, squad.army.shooters - lossesAttacker.shooters);
+    squad.army.tanks = Math.max(0, (squad.army.tanks || 0) - lossesAttacker.tanks);
+    garrison.tanks = Math.max(0, garrison.tanks - lossesGarrison.tanks);
+
+    const helmBonus = squad.artifacts && squad.artifacts.includes('titan_helmet') ? 1.3 : 1;
+    const expGainedAttacker = Math.floor(((lossesGarrison.tanks * 50) + (lossesAttacker.infantry * 5) + (lossesAttacker.cavalry * 8) + (lossesAttacker.shooters * 10)) * helmBonus);
+
+    // Изм. #3: опыт при любом исходе
+    if (isPlayerSquad && state.general.hired) state.general.exp += expGainedAttacker;
+
+    // Изм. #27: 15% шанс гарнизон присоединяется к игроку
+    const joinChance = state.season === 'winter' ? 0.30 : 0.15;
+    let garrisonJoined = false;
+    if (isPlayerSquad && winner === 'attacker' && Math.random() < joinChance) {
+        const joinedTanks = Math.floor(garrison.tanks * 0.5 + lossesGarrison.tanks * 0.3);
+        if (joinedTanks > 0) {
+            squad.army.tanks = (squad.army.tanks || 0) + joinedTanks;
+            garrison.tanks = 0;
+            garrisonJoined = true;
+            log(`🤝 <span class="victory">Армия гарнизона (${joinedTanks} 🚗) присоединилась к отряду "${squad.name}"!</span>`);
+        }
+    }
+
+    let logMsg = '';
+    if (winner === 'attacker') {
+        garrison.defeated = true; garrison.replenishTurnsLeft = 5 + Math.floor(Math.random() * 5);
+        if (isPlayerSquad) logMsg = `🏰 <span class="victory">Отряд "${squad.name}" разгромил гарнизон! Генерал +${expGainedAttacker} опыта.</span>`;
+    } else {
+        logMsg = `🏰 <span class="loss">Отряд "${squad.name}" разбит гарнизоном.</span> Генерал +${expGainedAttacker} опыта.`;
+        if (isPlayerSquad) {
+            cell.objects = cell.objects.filter(o => o.squadId !== squad.id || o.type !== 'squad_player');
+            state.squads = state.squads.filter(s => s.id !== squad.id);
+        } else {
+            cell.objects = cell.objects.filter(o => o.squadId !== squad.id || o.type !== 'squad_enemy');
+            const ownerC = state.enemyCountries.find(c => c.squads && c.squads.includes(squad));
+            if (ownerC) ownerC.squads = ownerC.squads.filter(s => s.id !== squad.id);
+        }
+    }
+    if (logMsg) log(logMsg);
+    return { winner, isSquadDestroyed: winner === 'garrison' };
+}
+
+function applyLossesAndCheckDestruction(squad, losses, type, cell, country = null) {
+    squad.army.infantry = Math.max(0, squad.army.infantry - losses.infantry);
+    squad.army.cavalry = Math.max(0, squad.army.cavalry - losses.cavalry);
+    squad.army.shooters = Math.max(0, squad.army.shooters - losses.shooters);
+    squad.army.tanks = Math.max(0, (squad.army.tanks || 0) - (losses.tanks || 0));
+    if (squad.army.infantry + squad.army.cavalry + squad.army.shooters + (squad.army.tanks || 0) <= 0) {
+        if (type === 'player') {
+            cell.objects = cell.objects.filter(o => o.squadId !== squad.id || o.type !== 'squad_player');
+            state.squads = state.squads.filter(s => s.id !== squad.id);
+            // Изм. #4: генерал страновой — просто продолжает служить
+        } else {
+            cell.objects = cell.objects.filter(o => o.squadId !== squad.id || o.type !== 'squad_enemy');
+            if (country) country.squads = country.squads.filter(s => s.id !== squad.id);
+        }
+    }
+}
+
+function cleanupEmptySquads() {
+    for (let i = state.squads.length - 1; i >= 0; i--) {
+        const sq = state.squads[i];
+        if (sq.army.infantry + sq.army.cavalry + sq.army.shooters + (sq.army.tanks || 0) <= 0) {
+            const cell = getCellAt(sq.position);
+            if (cell) cell.objects = cell.objects.filter(o => o.squadId !== sq.id || o.type !== 'squad_player');
+            log(`Отряд "${sq.name}" расформирован.`);
+            state.squads.splice(i, 1);
+        }
+    }
+}
+
+// Изм. #24: лог хранит ВСЕ записи, не обрезается до 50
+function log(msg) {
+    state.log.unshift({ turn: state.turn, text: msg });
+    if (state.gameStarted) renderLogOnly();
+}
+
+function renderLogOnly() {
+    const el = document.getElementById('gameLog');
+    if (el) el.innerHTML = state.log.slice(0, 100).map(e => `<div class="log-entry"><span class="log-turn">Ход ${e.turn}:</span> ${e.text}</div>`).join('');
+}
+
+function showFullLog() {
+    const body = document.getElementById('fullLogBody');
+    body.innerHTML = state.log.map(e => `<div class="log-entry"><span class="log-turn">Ход ${e.turn}:</span> ${e.text}</div>`).join('');
+    openModal('fullLogModal');
+}
+
+function checkActivityGifts() {
+    if (!state.activityGifts) state.activityGifts = { nextGiftTurn: 10 };
+    if (state.turn >= state.activityGifts.nextGiftTurn) {
+        const gifts = [
+            { name: 'золото', value: 500 + Math.floor(Math.random() * 1000), apply: (v) => { state.resources.gold += v; } },
+            { name: 'железо', value: 100 + Math.floor(Math.random() * 300), apply: (v) => { state.resources.iron += v; } },
+            { name: 'еда', value: 5000 + Math.floor(Math.random() * 10000), apply: (v) => { state.resources.food += v; } },
+        ];
+        const gift = gifts[Math.floor(Math.random() * gifts.length)];
+        gift.apply(gift.value);
+        log(`🎁 <span class="victory">Подарок за активность: +${gift.value} ${gift.name}!</span>`);
+        state.activityGifts.nextGiftTurn = state.turn + 8 + Math.floor(Math.random() * 7);
+    }
+}
+
+// Изм. #5: случайные открытия
+function processRandomDiscoveries() {
+    const summerBonus = state.season === 'summer' ? 0.02 : 0;
+    const baseChance = 0.005 + Math.random() * 0.005 + summerBonus;
+    if (Math.random() < baseChance) {
+        const disc = SCIENCE_DISCOVERIES[Math.floor(Math.random() * SCIENCE_DISCOVERIES.length)];
+        disc.apply(state);
+        if (!state.discoveries) state.discoveries = [];
+        state.discoveries.push(disc.id);
+        log(`🔬 <span class="victory">Научное открытие: <b>${disc.name}</b>! ${disc.desc}.</span>`);
+    }
+}
+
+function nextTurn() {
+    if (state.gameOver) return;
+    state.turn++;
+    state.season = getSeason();
+    state.squads.forEach(s => { s.movesLeft = 3; s.hasRaidedThisTurn = false; });
+    log(`--- Начало хода ${state.turn} (${getSeasonLabel()}) ---`);
+
+    // Изм. #5: случайные открытия
+    processRandomDiscoveries();
+
+    for (let i = state.buildingQueue.length - 1; i >= 0; i--) {
+        const item = state.buildingQueue[i]; item.turnsLeft--;
+        if (item.turnsLeft <= 0) { state.buildings[item.type] = 1; log(`<span class="victory">Постройка "${getBuildingName(item.type)}" завершена!</span>`); state.buildingQueue.splice(i, 1); }
+        else { log(`Постройка "${getBuildingName(item.type)}" завершится через ${item.turnsLeft} ходов.`); }
+    }
+
+    if (state.espionage.recruitCd > 0) state.espionage.recruitCd--;
+    if (state.espionage.stealCd > 0) state.espionage.stealCd--;
+
+    if (!state.unknownArtifacts) state.unknownArtifacts = [];
+    for (let i = state.unknownArtifacts.length - 1; i >= 0; i--) {
+        const ua = state.unknownArtifacts[i];
+        if (ua.researching && ua.researchTurnsLeft > 0) {
+            ua.researchTurnsLeft--;
+            if (ua.researchTurnsLeft <= 0) {
+                const art = ARTIFACTS[ua.artKey];
+                const squad = state.squads.find(s => s.id === ua.squadId) || state.squads[0];
+                if (squad) {
+                    if (!squad.artifacts) squad.artifacts = [];
+                    squad.artifacts.push(ua.artKey);
+                    applyArtifactEffect(ua.artKey, squad, state);
+                    log(`🏺 <span class="victory">Артефакт идентифицирован: ${art.icon} <b>${art.name}</b>! Передан "${squad.name}".</span>`);
+                }
+                state.unknownArtifacts.splice(i, 1);
+            }
+        }
+    }
+
+    // Изм. #26: банк с репутацией
+    if (state.buildings.bank && state.bankInfo.deposit > 0) {
+        state.bankInfo.turnsLeft--;
+        if (state.bankInfo.turnsLeft <= 0) {
+            const rate = getBankRate();
+            const payout = Math.floor(state.bankInfo.deposit * (1 + rate));
+            state.resources.gold += payout;
+            state.bankInfo.deposit = 0;
+            log(`<span class="victory">Банк выплатил депозит: +${payout}💰 (ставка ${Math.round(rate * 100)}%).</span>`);
+        }
+    }
+
+    if (state.scientistTrainingQueue.turnsLeft > 0) {
+        state.scientistTrainingQueue.turnsLeft--;
+        if (state.scientistTrainingQueue.turnsLeft <= 0) {
+            state.scientists += state.scientistTrainingQueue.quantity;
+            log(`<span class="victory">Обучение учёных завершено: +${state.scientistTrainingQueue.quantity}.</span>`);
+            state.scientistTrainingQueue.quantity = 0;
+        }
+    }
+
+    state.resources.gold += 100 + (state.buildings.market * 50);
+    const landIncome = state.land.total * 5; state.resources.gold += landIncome;
+    log(`🏞️ Доход с земли: +${landIncome}💰.`);
+    state.resources.food += (state.buildings.village * 30);
+    state.resources.iron += 20;
+
+    processFarms(state);
+    processOilFields(state, state.name);
+
+    // Изм. #29: рост рабочих
+    const growthBonus = state.workerGrowthBonus || 0;
+    const workerGrowth = Math.floor(state.workers * (0.02 + growthBonus));
+    state.workers += workerGrowth;
+
+    // Наука через учёных: каждые 100 учёных = 1% науки в ход
+    if (!state.scienceAssignments) state.scienceAssignments = { forestry: 0, mining: 0, ironMining: 0 };
+    for (const sci of ['forestry', 'mining', 'ironMining']) {
+        const assigned = state.scienceAssignments[sci] || 0;
+        if (assigned > 0 && state.sciences[sci] < 100) {
+            const progress = Math.floor(assigned / 100);
+            state.sciences[sci] = Math.min(100, state.sciences[sci] + progress);
+        }
+    }
+
+    // Восстановление рыночных запасов с учётом боевой активности (изм. #17)
+    state.warActivity = Math.max(0, (state.warActivity || 0) - 1);
+    for (const resource of Object.keys(marketState)) {
+        const mkt = marketState[resource];
+        const warBonus = 1 + (state.warActivity || 0) * 0.05;
+        mkt.supply = Math.min(mkt.maxSupply, mkt.supply + mkt.replenishRate * warBonus);
+        mkt.price = mkt.price + (mkt.basePrice - mkt.price) * 0.1;
+        if (mkt.price < mkt.basePrice * 0.2) mkt.price = mkt.basePrice * 0.2;
+        if (mkt.price > mkt.basePrice * 5) mkt.price = mkt.basePrice * 5;
+        // Изм. #17: лимит растёт при высоком спросе
+        if (mkt.demand > 10) {
+            mkt.maxSupply = Math.min(mkt.maxSupply + 1000, mkt.maxSupply * 1.01 + 500);
+            mkt.price *= 1.02;
+            mkt.demand = 0;
+        }
+    }
+
+    // Изм. #28: сезонные эффекты зимы на рынок
+    if (state.season === 'winter') {
+        for (const r of Object.keys(marketState)) {
+            marketState[r].maxSupply = Math.floor(marketState[r].maxSupply * 1.01);
+        }
+    }
+
+    // Изм. #10: доход с колоний (10000-15000 золото, 3000-5000 железо, 1000-1500 нефть)
+    for (let i = state.colonies.length - 1; i >= 0; i--) {
+        const colony = state.colonies[i];
+        if (colony.ownerId === state.name) {
+            if (colony.type === 'resource') {
+                const goldIncome = 10000 + Math.floor(Math.random() * 5001);
+                const ironIncome = 3000 + Math.floor(Math.random() * 2001);
+                const oilIncome = 1000 + Math.floor(Math.random() * 501);
+                state.resources.gold += goldIncome;
+                state.resources.iron += ironIncome;
+                state.resources.oil = (state.resources.oil || 0) + oilIncome;
+                log(`🗺️ Колония "${colony.name}": +${goldIncome}💰, +${ironIncome}⛏️, +${oilIncome}⛽.`);
+                // Изм. #11: шанс получить титановый артефакт с ресурсной колонии
+                if (Math.random() < 0.005) {
+                    const artKey = TITAN_ARTIFACT_KEYS[Math.floor(Math.random() * TITAN_ARTIFACT_KEYS.length)];
+                    if (!state.unknownArtifacts) state.unknownArtifacts = [];
+                    const targetSquad = state.squads[0];
+                    if (targetSquad) {
+                        if (!targetSquad.artifacts) targetSquad.artifacts = [];
+                        targetSquad.artifacts.push(artKey);
+                        applyArtifactEffect(artKey, targetSquad, state);
+                        log(`🏆 <span class="victory">Колония нашла редкий артефакт: ${ARTIFACTS[artKey].icon} ${ARTIFACTS[artKey].name}!</span>`);
+                    }
+                }
+            } else {
+                const infTroops = Math.floor(Math.random() * 21) + 10; const cavTroops = Math.floor(Math.random() * 21) + 10; const shoTroops = Math.floor(Math.random() * 21) + 10;
+                state.army.infantry += infTroops; state.army.cavalry += cavTroops; state.army.shooters += shoTroops;
+                log(`🗺️ Колония-крепость "${colony.name}": +${infTroops}🗡️, +${cavTroops}🐎, +${shoTroops}🏹.`);
+            }
+        }
+        colony.lifespan--;
+        if (colony.lifespan <= 0) {
+            const cell = getCellAt(colony.position);
+            if (cell) cell.objects = cell.objects.filter(o => o.type !== 'colony' || o.id !== colony.id);
+            state.colonies.splice(i, 1);
+        }
+    }
+
+    let totalArmyUpkeep = { gold: 0, food: 0 };
+    const allArmies = [state.army, ...state.squads.map(s => s.army)];
+    allArmies.forEach(army => {
+        totalArmyUpkeep.gold += (army.infantry || 0) * 1 + (army.cavalry || 0) * 2 + (army.shooters || 0) * 3 + (army.tanks || 0) * 10;
+        totalArmyUpkeep.food += (army.infantry || 0) * 1 + (army.cavalry || 0) * 1 + (army.shooters || 0) * 1 + (army.tanks || 0) * 3;
+    });
+    state.resources.gold -= Math.floor(totalArmyUpkeep.gold);
+    state.resources.food -= Math.floor(totalArmyUpkeep.food);
+    log(`Содержание армии: ${Math.floor(totalArmyUpkeep.gold)}💰, ${Math.floor(totalArmyUpkeep.food)}🍖.`);
+
+    if (state.resources.food <= 0) {
+        state.resources.food = 0; state.starvationTurns++;
+        if (state.starvationTurns >= 2) {
+            state.gameOver = true; state.deathReason = "GAME OVER — в следующий раз думай что делаешь";
+            log(`<span class="loss">${state.deathReason}</span>`); endGame(); return;
+        } else { log(`<span class="loss">Голод! Если не добыть еды, страна погибнет!</span>`); }
+    } else { state.starvationTurns = 0; }
+
+    for (const squad of state.squads) {
+        if (squad.capturingColony && squad.position === squad.capturingColony.colonyPos) {
+            squad.capturingColony.turnsRemaining--;
+            if (squad.capturingColony.turnsRemaining <= 0) {
+                const colony = state.colonies.find(c => c.id === squad.capturingColony.colonyId);
+                if (colony) { colony.ownerId = state.name; log(`<span class="victory">Отряд "${squad.name}" захватил колонию "${colony.name}"!</span>`); }
+                squad.capturingColony = null;
+            }
+        } else if (squad.capturingColony) { squad.capturingColony = null; }
+
+        // Изм. #16: захват страны 5 ходов, если отряд ушёл — счётчик сбрасывается
+        if (squad.capturingCountry) {
+            if (squad.position === squad.capturingCountry.countryPos) {
+                squad.capturingCountry.turnsRemaining--;
+                if (squad.capturingCountry.turnsRemaining <= 0) {
+                    const capturedCountry = state.enemyCountries.find(ec => ec.id === squad.capturingCountry.countryId);
+                    if (capturedCountry) {
+                        capturedCountry.captured = true;
+                        state.globalStats.playerCapturedCountries++;
+                        state.captures++;
+                        const desertMultiplier = capturedCountry.isDesert ? 5 : 1;
+                        const goldGained = capturedCountry.resources.gold * desertMultiplier;
+                        const ironGained = capturedCountry.resources.iron * desertMultiplier;
+                        const foodGained = capturedCountry.resources.food * desertMultiplier;
+                        const woodGained = (capturedCountry.resources.wood || 0) * desertMultiplier;
+                        const oilGained = (capturedCountry.resources.oil || 0) * desertMultiplier;
+                        const scientistsGained = capturedCountry.scientists;
+                        state.land.total += capturedCountry.land.total; state.land.mountains += capturedCountry.land.mountains;
+                        state.land.forests += capturedCountry.land.forests; state.land.plains += capturedCountry.land.plains;
+                        state.resources.gold += goldGained; state.resources.iron += ironGained;
+                        state.resources.food += foodGained; state.resources.wood += woodGained; state.resources.oil += oilGained;
+                        state.scientists += scientistsGained;
+                        state.workers += (capturedCountry.workers || 0);
+                        const baseCell = getCellAt(capturedCountry.homeBaseIndex);
+                        if (baseCell) baseCell.objects = baseCell.objects.filter(o => o.type !== 'country_base' || o.id !== capturedCountry.id);
+                        capturedCountry.squads.forEach(enemySq => {
+                            const sqCell = getCellAt(enemySq.position);
+                            if (sqCell) sqCell.objects = sqCell.objects.filter(o => !(o.type === 'squad_enemy' && o.squadId === enemySq.id));
+                        });
+                        capturedCountry.squads = [];
+
+                        // Трофеи с Титана при захвате его страны
+                        if (capturedCountry.isTitan) {
+                            log(`👹 <span class="victory">Страна-Титан <b>${capturedCountry.name}</b> покорена! Проверяем трофеи...</span>`);
+                            rollTitanTrophies(squad);
+                        }
+
+                        // Изм. #18: захваченная страна бота превращается в колонию
+                        if (!capturedCountry.isDesert) {
+                            const newColonyType = Math.random() < 0.5 ? 'resource' : 'fortress';
+                            const newColonyId = state.colonies.length > 0 ? Math.max(...state.colonies.map(c => c.id)) + 1 : 0;
+                            const newColony = {
+                                id: newColonyId,
+                                position: capturedCountry.homeBaseIndex,
+                                type: newColonyType,
+                                ownerId: state.name,
+                                lifespan: COLONY_LIFESPAN,
+                                name: capturedCountry.name
+                            };
+                            state.colonies.push(newColony);
+                            const baseC2 = getCellAt(capturedCountry.homeBaseIndex);
+                            if (baseC2) baseC2.objects.push({ type: 'colony', id: newColonyId });
+                            log(`🏘️ <span class="victory">${capturedCountry.name} захвачена и стала ${newColonyType === 'resource' ? 'ресурсной' : 'крепостной'} колонией!</span>`);
+                        } else {
+                            const desertNote = ' 🏜️ <b>×5 бонус пустыни!</b>';
+                            log(`<span class="victory">Отряд "${squad.name}" захватил пустыню <b>${capturedCountry.name}</b>!</span>${desertNote} 💰${goldGained}, 🍖${foodGained}, ⛏️${ironGained}.`);
+                        }
+                    }
+                    squad.capturingCountry = null;
+                }
+            } else {
+                // Отряд покинул — счётчик сбрасывается
+                log(`Отряд "${squad.name}" покинул территорию захвата. Прогресс сброшен.`);
+                squad.capturingCountry = null;
+            }
+        }
+
+        // Изм. #15: захват чужого месторождения — отряд заморожен на 5 ходов
+        if (squad.capturingOilField) {
+            if (squad.position === squad.capturingOilField.cellIndex) {
+                squad.capturingOilField.turnsRemaining--;
+                if (squad.capturingOilField.turnsRemaining <= 0) {
+                    const capturedOilFieldCellIndex = squad.capturingOilField.cellIndex;
+                    const capturedOilFieldTargetOwnerId = squad.capturingOilField.targetOwnerId;
+                    let targetOilField;
+                    const oldOwnerCountry = state.enemyCountries.find(c => c.id === capturedOilFieldTargetOwnerId);
+                    if (oldOwnerCountry) {
+                        targetOilField = oldOwnerCountry.oilFields.find(f => f.cellIndex === capturedOilFieldCellIndex);
+                        oldOwnerCountry.oilFields = oldOwnerCountry.oilFields.filter(f => f.cellIndex !== capturedOilFieldCellIndex);
+                    } else if (capturedOilFieldTargetOwnerId === state.name) {
+                        targetOilField = state.oilFields.find(f => f.cellIndex === capturedOilFieldCellIndex);
+                        state.oilFields = state.oilFields.filter(f => f.cellIndex !== capturedOilFieldCellIndex);
+                    }
+                    if (targetOilField) {
+                        state.oilFields.push(targetOilField);
+                        log(`<span class="victory">Отряд "${squad.name}" захватил нефтяное месторождение!</span>`);
+                    }
+                    squad.capturingOilField = null;
+                }
+                // Во время захвата отряд заморожен (movesLeft=0 уже установлен, блокируем его)
+                squad.movesLeft = 0;
+            } else {
+                log(`Отряд "${squad.name}" покинул место захвата месторождения. Прогресс сброшен.`);
+                squad.capturingOilField = null;
+            }
+        }
+    }
+
+    moveCountriesAndDevelop();
+    processTitanObjects();
+    resolveSquadBattles();
+    cleanupEmptySquads();
+    checkPlayerBaseCaptured();
+
+    if (state.turn >= state.nextBotSpawnTurn) spawnBotCountry();
+    // Изм. #9: 0.16 вместо 0.08
+    if (Math.random() < 0.16) spawnNewColonyInEmptyCell();
+    if (state.turn >= 40 && Math.random() < 0.05) spawnTitan();
+    // Изм. #7: 0.075 вместо 0.15
+    if (state.turn >= 30 && Math.random() < 0.075) spawnTitanCountry();
+
+    state.worldMap.cells.forEach(cell => {
+        const garrison = cell.objects.find(o => o.type === 'garrison' && o.defeated && o.replenishTurnsLeft > 0);
+        if (garrison) { garrison.replenishTurnsLeft--; if (garrison.replenishTurnsLeft <= 0) { garrison.defeated = false; garrison.tanks = 30 + Math.floor(Math.random() * 71); log(`🏰 Гарнизон в секторе ${cell.index} восстановился.`); } }
+    });
+
+    if (Math.random() < 0.03) botAllianceCheck();
+    checkActivityGifts();
+    render();
+}
+
+function checkPlayerBaseCaptured() {
+    for (const country of state.enemyCountries) {
+        if (country.captured || country.isDesert) continue;
+        for (const squad of country.squads) {
+            if (squad.capturingCountry && squad.capturingCountry.countryId === null && squad.capturingCountry.turnsRemaining <= 0) {
+                state.gameOver = true; state.deathReason = `Страна ${country.name} захватила вашу страну!`;
+                log(`<span class="loss">${state.deathReason}</span>`); endGame(); return;
+            }
+        }
+    }
+}
+
+// Изм. #23: союзы по взаимной выгоде, без денег
+function botAllianceCheck() {
+    for (const country of state.enemyCountries) {
+        if (country.allyId !== null && Math.random() < 0.05) {
+            if (country.allyId === -1) { state.allyId = null; }
+            else { const ally = state.enemyCountries.find(c => c.id === country.allyId); if (ally) { ally.allyId = null; } }
+            country.allyId = null;
+        }
+    }
+}
+
+function triggerEndGame() {
+    if (confirm("Вы уверены, что хотите сдаться и завершить игру?")) {
+        state.score = state.land.total; state.gameOver = true; state.deathReason = "Вы покинули этот мир.";
+        saveScoreToDB(); render(); setTimeout(() => showLeaderboard(), 500);
+    }
+}
+function endGame() { state.gameOver = true; saveScoreToDB(); render(); setTimeout(() => showLeaderboard(), 500); }
+
+function trainUnit(type) {
+    const inputId = `train${type.charAt(0).toUpperCase() + type.slice(1)}Count`;
+    const qty = parseInt(document.getElementById(inputId).value) || 0;
+    if (qty <= 0) return;
+
+    // Изм. #29: рабочие требуются для обучения
+    if (state.workers < qty) return alert(`Недостаточно рабочих! Нужно ${qty}, есть ${state.workers}.`);
+
+    if (type === 'tanks') {
+        if (state.turn < 50) return alert("Танки доступны только начиная с 50 хода!");
+        if (!state.buildings.factory) return alert("Для постройки танков нужен Завод!");
+        const oilNeeded = qty * UNIT_COSTS.tanks.oil;
+        if ((state.resources.oil || 0) < oilNeeded) return alert(`Недостаточно нефти! Нужно ${oilNeeded}⛽.`);
+        const woodNeeded = qty * UNIT_COSTS.tanks.wood;
+        if ((state.resources.wood || 0) < woodNeeded) return alert(`Недостаточно дерева! Нужно ${woodNeeded}🌲.`);
+    }
+    const costs = UNIT_COSTS[type];
+    const costG = qty * costs.gold; const costI = qty * costs.iron; const costF = qty * costs.food;
+    const costOil = type === 'tanks' ? qty * costs.oil : 0;
+    const costWood = type === 'tanks' ? qty * costs.wood : 0;
+    if (state.resources.gold >= costG && state.resources.iron >= costI && state.resources.food >= costF && (state.resources.oil || 0) >= costOil && (state.resources.wood || 0) >= costWood) {
+        state.resources.gold -= costG; state.resources.iron -= costI; state.resources.food -= costF;
+        if (type === 'tanks') { state.resources.oil = (state.resources.oil || 0) - costOil; state.resources.wood = (state.resources.wood || 0) - costWood; }
+        state.army[type] = (state.army[type] || 0) + qty;
+        state.workers -= qty;
+        log(`Обучено ${qty} ${type}.`);
+        if (type === 'tanks') { openModal('factoryModal'); } else { openModal('barracksModal'); }
+        render();
+    } else { alert("Недостаточно ресурсов!"); }
+}
+
+function build(type) {
+    if (state.buildings[type]) return alert("Это здание уже построено!");
+    if (state.buildingQueue.some(item => item.type === type)) return alert("Это здание уже строится!");
+    const costG = COSTS.build[type];
+    const costOil = type === 'factory' ? 200 : 0;
+    const buildTime = BUILDING_TIMES[type] || 1;
+    if (type === 'bank' && (!state.buildings.townhall || !state.buildings.market)) return alert("Для постройки банка нужна Ратуша и Рынок");
+    if (state.resources.gold >= costG && (state.resources.oil || 0) >= costOil) {
+        state.resources.gold -= costG;
+        if (costOil > 0) state.resources.oil = (state.resources.oil || 0) - costOil;
+        state.buildingQueue.push({ type, turnsLeft: buildTime });
+        log(`Начато строительство: ${getBuildingName(type)}. Завершится через ${buildTime} ходов.`); render();
+    } else { alert("Недостаточно ресурсов!"); }
+}
+
+function trainScientists() {
+    const qty = parseInt(document.getElementById('trainScientistsQty').value) || 0;
+    if (qty <= 0) return;
+    // Изм. #29: требуются рабочие
+    if (state.workers < qty) return alert(`Недостаточно рабочих! Нужно ${qty}, есть ${state.workers}.`);
+    const cost = qty * 100;
+    if (state.resources.gold < cost) return alert(`Нужно ${cost}💰.`);
+    state.resources.gold -= cost;
+    state.workers -= qty;
+    state.scientistTrainingQueue.quantity += qty;
+    state.scientistTrainingQueue.turnsLeft = 5;
+    log(`Начато обучение ${qty} учёных (-${qty} рабочих). Завершение через 5 ходов.`);
+    openModal('universityModal'); render();
+}
+
+function assignScientists(scienceType) {
+    const inputId = `assign${scienceType.charAt(0).toUpperCase() + scienceType.slice(1)}Scientists`;
+    const qty = parseInt(document.getElementById(inputId).value) || 0;
+    if (!state.scienceAssignments) state.scienceAssignments = { forestry: 0, mining: 0, ironMining: 0 };
+    if (qty < 0) return;
+    const totalAssigned = Object.values(state.scienceAssignments).reduce((a, b) => a + b, 0) - (state.scienceAssignments[scienceType] || 0) + qty;
+    if (totalAssigned > state.scientists) return alert(`Недостаточно учёных! Доступно: ${state.scientists}, назначено: ${totalAssigned}.`);
+    state.scienceAssignments[scienceType] = qty;
+    log(`Направлено ${qty} учёных на изучение ${scienceType}.`);
+    openModal('universityModal'); render();
+}
+
+function makeBankDeposit() {
+    const amount = parseInt(document.getElementById('bankDepositInput').value) || 0;
+    if (amount <= 0) return;
+    if (state.resources.gold < amount) return alert("Недостаточно золота!");
+    if (state.bankInfo.deposit > 0) return alert("Депозит уже открыт. Дождитесь выплаты.");
+    state.resources.gold -= amount;
+    state.bankInfo.deposit = amount;
+    state.bankInfo.turnsLeft = 5;
+    // Изм. #26: репутация растёт с вкладами
+    state.reputation = (state.reputation || 0) + 1;
+    const rate = getBankRate();
+    log(`💰 Депозит открыт: ${amount}💰 на 5 ходов. Ставка: ${Math.round(rate * 100)}%. Репутация: ${state.reputation}.`);
+    closeModal('bankModal'); render();
+}
+
+function openTownhall() {
+    const th = document.getElementById('townhallStats');
+    th.innerHTML = `<b>Учёных:</b> ${state.scientists} | <b>Рабочих:</b> ${state.workers}<br>
+        <b>Репутация:</b> ${state.reputation} | <b>Сезон:</b> ${getSeasonLabel()}<br>
+        <b>Потери:</b> ${state.globalStats.lostTroops} | <b>Уничтожено врагов:</b> ${state.globalStats.killedTroops}<br>
+        <b>Захвачено стран:</b> ${state.globalStats.playerCapturedCountries}`;
+    const genDisplay = document.getElementById('generalDisplay');
+    const genActions = document.getElementById('generalActions');
+    if (state.general.hired) {
+        genDisplay.innerHTML = `<strong>Генерал: ${state.general.name}</strong><br>Навык: ${state.general.skill} | Опыт: ${state.general.exp}<br><small>Генерал усиливает ВСЕ ваши отряды.</small>`;
+        const upgradeCost = 500;
+        genActions.innerHTML = `<div class="row" style="margin-top:5px;">
+            <input type="number" id="upgradeGenQty" class="qty-input" value="1" min="1">
+            <button onclick="upgradeGeneralSkill()">Повысить навык (${upgradeCost} зол/шт)</button>
+            <button onclick="fireGeneral()" style="color:#c00;">Уволить генерала</button>
+        </div>`;
+    } else {
+        genDisplay.innerHTML = `<span>Генерал не нанят.</span>`;
+        genActions.innerHTML = `<button onclick="closeModal('townhallModal'); openModal('hireGeneralModal');">Нанять генерала (300💰)</button>`;
+    }
+    const rdisplay = document.getElementById('recruitLvlDisplay'); if (rdisplay) rdisplay.innerText = state.espionage.recruitLvl;
+    const rcd = document.getElementById('recruitCdDisplay'); if (rcd) rcd.innerText = state.espionage.recruitCd;
+    const sdisplay = document.getElementById('stealLvlDisplay'); if (sdisplay) sdisplay.innerText = state.espionage.stealLvl;
+    const scd = document.getElementById('stealCdDisplay'); if (scd) scd.innerText = state.espionage.stealCd;
+    openModal('townhallModal');
+}
+
+function upgradeGeneralSkill() {
+    if (!state.general.hired) return alert("Нет генерала!");
+    const qty = parseInt(document.getElementById('upgradeGenQty').value) || 1;
+    const cost = qty * 500;
+    if (state.resources.gold < cost) return alert(`Нужно ${cost}💰.`);
+    state.resources.gold -= cost;
+    state.general.skill += qty;
+    log(`⭐ Навык генерала ${state.general.name} повышен на ${qty}. Новый навык: ${state.general.skill}.`);
+    openTownhall();
+}
+
+function fireGeneral() {
+    if (!state.general.hired) return;
+    if (!confirm(`Уволить генерала ${state.general.name}?`)) return;
+    state.general.hired = false;
+    state.general.name = "";
+    state.general.skill = 1;
+    state.general.exp = 0;
+    log(`Генерал уволен.`);
+    openTownhall();
+}
+
+// Изм. #22: простой найм генерала — только имя
+function confirmHireGeneral() {
+    const name = document.getElementById('generalNameInput').value.trim();
+    if (!name) return alert("Введите имя генерала.");
+    if (!isGeneralNameUnique(name)) return alert("Генерал с таким именем уже есть!");
+    if (state.resources.gold < COSTS.general) return alert(`Нужно ${COSTS.general}💰.`);
+    state.resources.gold -= COSTS.general;
+    state.general.hired = true;
+    state.general.name = name;
+    state.general.skill = 1;
+    state.general.exp = 0;
+    log(`⭐ Генерал <b>${name}</b> нанят! Он усиливает все ваши отряды.`);
+    closeModal('hireGeneralModal');
+    render();
+}
+
+function upgradeEspionage(type) {
+    const qtyInput = document.getElementById(`upgrade${type.charAt(0).toUpperCase() + type.slice(1)}Qty`);
+    const qty = parseInt(qtyInput.value) || 1;
+    const cost = qty * 200;
+    const key = type + 'Lvl';
+    if (state.espionage[key] >= 100) return alert("Максимальный уровень!");
+    if (state.resources.gold < cost) return alert(`Нужно ${cost}💰.`);
+    state.resources.gold -= cost;
+    state.espionage[key] = Math.min(100, state.espionage[key] + qty);
+    log(`Диверсия "${type}" улучшена до ${state.espionage[key]}.`);
+    openTownhall();
+}
+
+function executeRecruit() {
+    if (state.espionage.recruitCd > 0) return alert(`Вербовка на перезарядке (${state.espionage.recruitCd} х).`);
+    if (state.espionage.recruitLvl === 0) return alert("Сначала улучшите вербовку.");
+    const neighbors = state.enemyCountries.filter(c => !c.captured && c.squads.length > 0 && Math.abs(c.homeBaseIndex - state.homeBaseIndex) <= 30);
+    if (neighbors.length === 0) return alert("Нет подходящих целей.");
+    const target = neighbors[Math.floor(Math.random() * neighbors.length)];
+    const targetSquad = target.squads[Math.floor(Math.random() * target.squads.length)];
+    if (state.squads.length > 0) {
+        const playerSquad = state.squads[0];
+        recruitFromEnemySquad(playerSquad.id, targetSquad.id, target.id);
+    }
+}
+
+function executeSteal() {
+    if (state.espionage.stealCd > 0) return alert(`Воровство на перезарядке (${state.espionage.stealCd} х).`);
+    if (state.espionage.stealLvl === 0) return alert("Сначала улучшите воровство.");
+    const neighbors = state.enemyCountries.filter(c => !c.captured && Math.abs(c.homeBaseIndex - state.homeBaseIndex) <= 20);
+    if (neighbors.length === 0) return alert("Нет соседей для воровства.");
+    const target = neighbors[Math.floor(Math.random() * neighbors.length)];
+    const factor = 0.10 + (state.espionage.stealLvl / 1000);
+    const stG = Math.floor(target.resources.gold * factor);
+    target.resources.gold -= stG; state.resources.gold += stG;
+    log(`<span class="victory">Воровство! Украдено ${stG}💰 у ${target.name}.</span>`);
+    state.espionage.stealCd = 3; render();
+}
+
+function updateBarracksUI() {
+    document.getElementById('costInfantry').innerText = `(${UNIT_COSTS.infantry.gold}💰, ${UNIT_COSTS.infantry.iron}⛏️, ${UNIT_COSTS.infantry.food}🍖)`;
+    document.getElementById('costShooters').innerText = `(${UNIT_COSTS.shooters.gold}💰, ${UNIT_COSTS.shooters.iron}⛏️, ${UNIT_COSTS.shooters.food}🍖)`;
+    document.getElementById('costCavalry').innerText = `(${UNIT_COSTS.cavalry.gold}💰, ${UNIT_COSTS.cavalry.iron}⛏️, ${UNIT_COSTS.cavalry.food}🍖)`;
+    const w = document.getElementById('barracksWorkers'); if (w) w.innerText = state.workers;
+    const tankNote = document.getElementById('tankNote');
+    if (state.turn < 50) tankNote.innerText = `Танки производятся только на Заводе (с 50 хода, сейчас: ${state.turn}).`;
+    else if (!state.buildings.factory) tankNote.innerText = 'Для постройки танков нужен Завод!';
+    else tankNote.innerText = 'Танки производятся в Заводе.';
+}
+
+function updateFactoryUI() {
+    const oilInfo = document.getElementById('factoryOilInfo');
+    oilInfo.innerHTML = `Нефть: <strong>${state.resources.oil || 0}⛽</strong>`;
+    const tankRow = document.getElementById('tankTrainRow');
+    const tankNote = document.getElementById('factoryTankNote');
+    if (state.turn >= 50) {
+        tankRow.style.display = 'flex';
+        document.getElementById('costTanks').innerText = `(${UNIT_COSTS.tanks.gold}💰, ${UNIT_COSTS.tanks.iron}⛏️, ${UNIT_COSTS.tanks.oil}⛽, ${UNIT_COSTS.tanks.wood}🌲)`;
+        tankNote.innerText = '';
+    } else {
+        tankRow.style.display = 'none';
+        tankNote.innerText = `Танки доступны с 50 хода (сейчас: ${state.turn}).`;
+    }
+    const oilFieldsDiv = document.getElementById('factoryOilFields');
+    if (!state.oilFields) state.oilFields = [];
+    if (state.oilFields.length === 0) {
+        oilFieldsDiv.innerHTML = '<p style="font-size:12px; color:#888;">Нет активных месторождений.</p>';
+    } else {
+        oilFieldsDiv.innerHTML = state.oilFields.map(f => {
+            if (!f.developed) return `<div class="capture-info">Месторождение (сектор ${f.cellIndex}): ${OIL_FIELD_DEVELOP_TURNS - f.developTurnsLeft}/${OIL_FIELD_DEVELOP_TURNS} ходов. Рабочих: ${f.assignedWorkers || 0}.</div>`;
+            return `<div class="capture-info">Месторождение (сектор ${f.cellIndex}): ${f.accumulated}/${f.capacity}⛽.</div>`;
+        }).join('');
+    }
+}
+
+// Изм. #8: разработка нефти через отряд; изм. #14: 20 ходов, нужны 100 рабочих
+function developOilFieldFromSquad(squadId) {
+    const squad = state.squads.find(s => s.id === squadId);
+    if (!squad) return;
+    if (!state.oilFields) state.oilFields = [];
+    const cell = getCellAt(squad.position);
+    if (!cell || !cell.objects.find(o => o.type === 'swamp')) return alert("Ваш отряд не находится на болоте!");
+    const existingField = state.oilFields.find(f => f.cellIndex === squad.position);
+    const existingBotField = state.enemyCountries.some(c => c.oilFields && c.oilFields.some(f => f.cellIndex === squad.position));
+    if (existingField) return alert("В этом секторе уже есть ваше месторождение!");
+    if (existingBotField) return alert("В этом секторе уже есть месторождение другой страны!");
+    // Изм. #14: минимум 100 рабочих
+    if (state.workers < 100) return alert("Для разработки месторождения нужно минимум 100 рабочих!");
+    state.oilFields.push({ cellIndex: squad.position, developTurnsLeft: OIL_FIELD_DEVELOP_TURNS, developed: false, accumulated: 0, capacity: 0, assignedWorkers: 0 });
+    cell.objects.push({ type: 'oil_field', ownerId: state.name, cellIndex: squad.position });
+    log(`⛽ Отряд "${squad.name}" начал разработку нефтяного месторождения (сектор ${squad.position}). Займёт ${OIL_FIELD_DEVELOP_TURNS} ходов. Добавьте рабочих в меню "Деревни" для ускорения.`);
+    render();
+}
+
+function assignWorkersToOilField(cellIndex, qty) {
+    const field = state.oilFields.find(f => f.cellIndex === cellIndex);
+    if (!field) return;
+    if (state.workers < qty) return alert(`Недостаточно рабочих. Есть: ${state.workers}.`);
+    field.assignedWorkers = (field.assignedWorkers || 0) + qty;
+    state.workers -= qty;
+    log(`⛽ Назначено ${qty} рабочих на месторождение в секторе ${cellIndex}. Каждые 100 рабочих ускоряют разработку на 1 ход.`);
+    render();
+}
+
+function saveScoreToDB() {
+    const score = state.land.total; state.score = score > 0 ? score : 0;
+    let db = JSON.parse(localStorage.getItem('civ_scores_v4')) || [];
+    db.push({ name: state.name, score: state.score, date: new Date().toLocaleDateString() });
+    db.sort((a, b) => b.score - a.score); if (db.length > 10) db = db.slice(0, 10);
+    localStorage.setItem('civ_scores_v4', JSON.stringify(db)); return state.score;
+}
+
+function showLeaderboard() {
+    const modal = document.getElementById('leaderboardModal'); const body = document.getElementById('leaderboardBody');
+    const data = JSON.parse(localStorage.getItem('civ_scores_v4')) || [];
+    let html = `<table class="leaderboard-table"><tr><th>Ранг</th><th>Игрок</th><th>Земля</th><th>Дата</th></tr>`;
+    if (data.length === 0) html += `<tr><td colspan="4" style="text-align:center">Нет записей</td></tr>`;
+    data.forEach((entry, index) => { html += `<tr><td>#${index + 1}</td><td>${entry.name}</td><td>${entry.score}</td><td>${entry.date}</td></tr>`; });
+    html += `</table>`;
+    body.innerHTML = html; modal.style.display = 'block';
+}
+
+function startGame() {
+    const n = document.getElementById('countryNameInput').value; if (!n) return alert("Введите имя");
+    initGame(); state.name = n; state.gameStarted = true; initWorldMap();
+    openNameInputModal("Дайте имя вашему основному отряду:", (squadName) => { if (!squadName) squadName = "Основной отряд"; createSquad(true, squadName); render(); });
+}
+
+function createSquad(isInitial = false, initialName = '') {
+    if (!isInitial && state.squads.length >= 3) return alert("Максимум 3 отряда.");
+    if (!isInitial && state.army.infantry + state.army.cavalry + state.army.shooters + (state.army.tanks || 0) === 0) return alert("На базе нет войск.");
+    let squadName = initialName;
+    if (!isInitial) { squadName = prompt("Введите имя для нового отряда:"); if (!squadName) return alert("Имя не может быть пустым."); if (!isSquadNameUnique(squadName)) return alert("Отряд с таким именем уже есть."); }
+    else { if (!isSquadNameUnique(squadName)) squadName = `Основной отряд ${state.nextSquadId + 1}`; }
+    const newSquad = { id: state.nextSquadId++, name: squadName, position: state.homeBaseIndex, army: { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 }, artifacts: [], capturingColony: null, capturingCountry: null, capturingOilField: null, movesLeft: 3, hasRaidedThisTurn: false, wins: 0 };
+    if (isInitial) { newSquad.army.infantry = state.army.infantry; newSquad.army.cavalry = state.army.cavalry; newSquad.army.shooters = state.army.shooters; newSquad.army.tanks = state.army.tanks || 0; state.army.infantry = 0; state.army.cavalry = 0; state.army.shooters = 0; state.army.tanks = 0; }
+    state.squads.push(newSquad); getCellAt(state.homeBaseIndex).objects.push({ type: 'squad_player', squadId: newSquad.id });
+    if (!isInitial) openReinforceModal(newSquad.id);
+    render();
+}
+
+function moveSquad(squadId, direction) {
+    const squad = state.squads.find(s => s.id === squadId);
+    if (!squad) return;
+    if (squad.movesLeft <= 0) return;
+    if (!state.general.hired) return alert("Для передвижения нужен генерал! Наймите в Ратуше.");
+    // Изм. #15: заморозка при захвате месторождения
+    if (squad.capturingOilField) return alert("Отряд занят захватом месторождения и не может двигаться!");
+
+    const newPos = squad.position + direction;
+    if (newPos >= 0 && newPos < state.worldMap.cells.length) {
+        const targetCell = getCellAt(newPos);
+        let battleResult = null;
+
+        if (targetCell) {
+            const activeGarrison = targetCell.objects.find(o => o.type === 'garrison' && !o.defeated);
+            if (activeGarrison) {
+                battleResult = resolveGarrisonBattle(squad, activeGarrison, targetCell, true);
+                if (battleResult.isSquadDestroyed) return;
+            }
+            const activeTitan = targetCell.objects.find(o => o.type === 'titan');
+            if (activeTitan && !battleResult?.isSquadDestroyed) {
+                battleResult = resolveTitanBattle(squad, activeTitan, targetCell, true);
+                if (battleResult.isSquadDestroyed) return;
+            }
+        }
+
+        const oldCell = getCellAt(squad.position);
+        if (oldCell) oldCell.objects = oldCell.objects.filter(o => o.squadId !== squad.id || o.type !== 'squad_player');
+        squad.position = newPos;
+        squad.movesLeft--;
+
+        // Изм. #28: зима — нет потерь в болотах
+        if (state.season !== 'winter') checkSwampPenalty(squad, newPos);
+
+        const newCell = getCellAt(newPos);
+        if (newCell) newCell.objects.push({ type: 'squad_player', squadId: squad.id });
+        trackVisitedCountries(newPos);
+        state.focusSector = newPos;
+        render();
+    }
+}
+
+function checkSwampPenalty(squad, pos) {
+    const cell = getCellAt(pos);
+    if (cell && cell.objects.find(o => o.type === 'swamp')) {
+        const lf = 0.2;
+        squad.army.infantry = Math.max(0, Math.floor(squad.army.infantry * (1 - lf)));
+        squad.army.cavalry = Math.max(0, Math.floor(squad.army.cavalry * (1 - lf)));
+        squad.army.shooters = Math.max(0, Math.floor(squad.army.shooters * (1 - lf)));
+        squad.army.tanks = Math.max(0, Math.floor((squad.army.tanks || 0) * (1 - lf)));
+        log(`🪸 Отряд "${squad.name}" потерял 20% армии в болоте (сектор ${pos}).`);
+    }
+}
+
+function openReinforceModal(squadId) {
+    const squad = state.squads.find(s => s.id === squadId); if (!squad) return;
+    const body = document.getElementById('reinforceBody');
+    body.innerHTML = `<h4>Подкрепление для отряда "${squad.name}"</h4>
+        <p><strong>Армия на базе:</strong> 🗡️ ${state.army.infantry} 🐎 ${state.army.cavalry} 🏹 ${state.army.shooters} 🚗 ${state.army.tanks || 0}</p>
+        <p><strong>Армия в отряде:</strong> 🗡️ ${squad.army.infantry} 🐎 ${squad.army.cavalry} 🏹 ${squad.army.shooters} 🚗 ${squad.army.tanks || 0}</p>
+        <hr><div class="row"><input type="number" id="reinforce_infantry" class="qty-input" value="0"><span>Пехота 🗡️</span></div>
+        <div class="row"><input type="number" id="reinforce_cavalry" class="qty-input" value="0"><span>Кавалерия 🐎</span></div>
+        <div class="row"><input type="number" id="reinforce_shooters" class="qty-input" value="0"><span>Стрелки 🏹</span></div>
+        <div class="row"><input type="number" id="reinforce_tanks" class="qty-input" value="0"><span>Танки 🚗</span></div>
+        <div class="row" style="margin-top: 15px;"><button onclick="transferAllTroops()">Передать все войска</button> <button class="primary" onclick="confirmReinforce(${squadId})">Подтвердить</button></div>`;
+    openModal('reinforceModal');
+}
+
+function transferAllTroops() { document.getElementById('reinforce_infantry').value = state.army.infantry; document.getElementById('reinforce_cavalry').value = state.army.cavalry; document.getElementById('reinforce_shooters').value = state.army.shooters; document.getElementById('reinforce_tanks').value = state.army.tanks || 0; }
+
+function confirmReinforce(squadId) {
+    const squad = state.squads.find(s => s.id === squadId); if (!squad) return;
+    const inf = parseInt(document.getElementById('reinforce_infantry').value) || 0;
+    const cav = parseInt(document.getElementById('reinforce_cavalry').value) || 0;
+    const sho = parseInt(document.getElementById('reinforce_shooters').value) || 0;
+    const tan = parseInt(document.getElementById('reinforce_tanks').value) || 0;
+    if (inf < 0 || cav < 0 || sho < 0 || tan < 0) return alert("Не может быть отрицательным!");
+    if (inf > state.army.infantry || cav > state.army.cavalry || sho > state.army.shooters || tan > (state.army.tanks || 0)) return alert("Недостаточно войск!");
+    state.army.infantry -= inf; state.army.cavalry -= cav; state.army.shooters -= sho; state.army.tanks = (state.army.tanks || 0) - tan;
+    squad.army.infantry += inf; squad.army.cavalry += cav; squad.army.shooters += sho; squad.army.tanks = (squad.army.tanks || 0) + tan;
+    closeModal('reinforceModal'); cleanupEmptySquads(); render();
+}
+
+function startColonyCapture(squadId, colonyId) {
+    const squad = state.squads.find(s => s.id === squadId); if (!squad || squad.capturingCountry) return;
+    const colony = state.colonies.find(c => c.id === colonyId);
+    if (colony) squad.capturingColony = { colonyId: colony.id, colonyPos: colony.position, turnsRemaining: COLONY_CAPTURE_TURNS };
+    render();
+}
+
+function startCountryCapture(squadId, countryId) {
+    const squad = state.squads.find(s => s.id === squadId); const country = state.enemyCountries.find(ec => ec.id === countryId);
+    if (!squad || !country || country.captured || squad.capturingColony) return;
+    if (country.immunityTurns > 0) return alert(`Эта страна под защитой ещё ${country.immunityTurns} ходов!`);
+    if (state.allyId === countryId) return alert('Нельзя атаковать союзника!');
+    squad.capturingCountry = { countryId: country.id, countryPos: country.homeBaseIndex, turnsRemaining: COUNTRY_CAPTURE_TURNS, buildingsToRaid: Object.keys(country.buildings).filter(b => country.buildings[b] > 0) };
+    // Изм. #12: отображение атаки на карте
+    log(`⚔️ Отряд <b>${squad.name}</b> в атаке государства <b>${country.name}</b>!`);
+    render();
+}
+
+function openRaidModal(squadId, countryId) {
+    const squad = state.squads.find(s => s.id === squadId); const country = state.enemyCountries.find(ec => ec.id === countryId);
+    if (!squad || !country || !squad.capturingCountry || squad.capturingCountry.countryId !== countryId) return;
+    const body = document.getElementById('raidBody'); let buildingsHtml = '';
+    if (squad.capturingCountry.buildingsToRaid && squad.capturingCountry.buildingsToRaid.length > 0) {
+        buildingsHtml = squad.capturingCountry.buildingsToRaid.map(bType => `<button onclick="raidBuilding(${squadId}, ${countryId}, '${bType}')">Разрушить ${getBuildingName(bType)}</button>`).join('');
+    } else buildingsHtml = "<p>Все доступные здания разрушены!</p>";
+    if (squad.capturingCountry.turnsRemaining === COUNTRY_CAPTURE_TURNS) buildingsHtml = '<p style="color:#c00;">⛔ Рейд доступен со следующего хода.</p>';
+    body.innerHTML = `<h4>Рейд на ${country.name}</h4><p>До завершения захвата: ${squad.capturingCountry.turnsRemaining} ходов.</p><div class="row">${buildingsHtml}</div>`;
+    openModal('raidModal');
+}
+
+function raidBuilding(squadId, countryId, buildingType) {
+    const squad = state.squads.find(s => s.id === squadId); const country = state.enemyCountries.find(ec => ec.id === countryId);
+    if (!squad || !country) return;
+    if (squad.hasRaidedThisTurn) return alert("Этот отряд уже разрушал здание в этом ходу!");
+    const index = squad.capturingCountry.buildingsToRaid.indexOf(buildingType); if (index === -1) return;
+    country.buildings[buildingType] = 0; squad.capturingCountry.buildingsToRaid.splice(index, 1); squad.hasRaidedThisTurn = true;
+    if (buildingType === 'market') {
+        const s30g = Math.floor(country.resources.gold * 0.30); const s30f = Math.floor(country.resources.food * 0.30); const s30i = Math.floor(country.resources.iron * 0.30);
+        country.resources.gold -= s30g; country.resources.food -= s30f; country.resources.iron -= s30i;
+        state.resources.gold += s30g; state.resources.food += s30f; state.resources.iron += s30i;
+        log(`🏪 Рынок разрушен! Получено: 💰${s30g}, 🍖${s30f}, ⛏️${s30i}.`);
+    }
+    if (buildingType === 'university') {
+        const s30s = Math.floor(country.scientists * 0.30);
+        country.scientists -= s30s; state.scientists += s30s;
+        log(`🎓 Университет разрушен! +${s30s} учёных.`);
+    }
+    rollForArtifact(state.name, state, squad, buildingType === 'university');
+    closeModal('raidModal'); render();
+}
+
+function attackEnemySquad(playerSquadId, enemySquadObj) {
+    if (!state.general.hired) return alert("Бой без генерала невозможен!");
+    const playerSquad = state.squads.find(s => s.id === playerSquadId);
+    if (playerSquad.army.infantry + playerSquad.army.cavalry + playerSquad.army.shooters + (playerSquad.army.tanks || 0) <= 0) return alert("Отряд пуст!");
+    const enemyCountry = state.enemyCountries.find(ec => ec.id === enemySquadObj.ownerId);
+    const enemySquad = enemyCountry.squads.find(s => s.id === enemySquadObj.squadId);
+    if (!playerSquad || !enemySquad || !enemyCountry) return;
+
+    // Изм. #12: лог атаки
+    log(`⚔️ Отряд <b>${playerSquad.name}</b> в атаке отряда <b>${enemySquad.name}</b> (${enemyCountry.name})!`);
+    state.warActivity = (state.warActivity || 0) + 2;
+
+    const battleResult = resolveBattle(playerSquad, enemySquad, state, enemyCountry);
+    const cell = getCellAt(playerSquad.position);
+    let logMsg = `⚔️ <b>Итог битвы (Сектор ${cell.index})</b>: `;
+    if (battleResult.winner === 'player') {
+        logMsg += `<span class="victory">Победа!</span> `;
+        if (state.general.hired && battleResult.expGainedFor1 > 0) { state.general.exp += battleResult.expGainedFor1; logMsg += `Генерал +${battleResult.expGainedFor1} опыта. `; }
+    } else {
+        logMsg += `<span class="loss">Поражение!</span> `;
+        // Изм. #3: опыт при поражении тоже начисляется
+        if (state.general.hired && battleResult.expGainedFor1 > 0) { state.general.exp += battleResult.expGainedFor1; logMsg += `Генерал +${battleResult.expGainedFor1} опыта. `; }
+        if (enemyCountry.general.hired && battleResult.expGainedFor2 > 0) enemyCountry.general.exp += battleResult.expGainedFor2;
+    }
+    logMsg += `<br>Наши потери: 🗡️${battleResult.losses1.infantry}, 🐎${battleResult.losses1.cavalry}, 🏹${battleResult.losses1.shooters}. Врага: 🗡️${battleResult.losses2.infantry}, 🐎${battleResult.losses2.cavalry}.`;
+    log(logMsg);
+    applyLossesAndCheckDestruction(playerSquad, battleResult.losses1, 'player', cell);
+    const enemySquadWasAlive = enemyCountry.squads.includes(enemySquad);
+    applyLossesAndCheckDestruction(enemySquad, battleResult.losses2, 'enemy', cell, enemyCountry);
+    // Трофеи с Титана при уничтожении его отряда в прямом бою
+    if (battleResult.winner === 'player' && enemyCountry.isTitan && enemySquadWasAlive && !enemyCountry.squads.includes(enemySquad)) {
+        log(`👹 <span class="victory">Отряд Титана уничтожен! Проверяем трофеи...</span>`);
+        rollTitanTrophies(playerSquad);
+    }
+    cleanupEmptySquads(); render();
+}
+
+function trackVisitedCountries(pos) {
+    const cell = getCellAt(pos); if (!cell) return;
+    cell.objects.forEach(o => {
+        let countryId = null; if (o.type === 'country_base') countryId = o.id; else if (o.type === 'squad_enemy') countryId = o.ownerId;
+        if (countryId !== null && !state.visitedCountryIds.includes(countryId)) state.visitedCountryIds.push(countryId);
+    });
+}
+
+function recruitFromEnemySquad(playerSquadId, enemySquadId, ownerId) {
+    const playerSquad = state.squads.find(s => s.id === playerSquadId);
+    const enemyCountry = state.enemyCountries.find(ec => ec.id === ownerId);
+    const enemySquad = enemyCountry ? enemyCountry.squads.find(s => s.id === enemySquadId) : null;
+    if (!playerSquad || !enemySquad || !enemyCountry) return;
+    const successChance = 0.4 + (state.espionage.recruitLvl / 250);
+    if (Math.random() < successChance) {
+        const factor = 0.08 + (state.espionage.recruitLvl / 1000);
+        const infR = Math.floor((enemySquad.army.infantry || 0) * factor); const cavR = Math.floor((enemySquad.army.cavalry || 0) * factor); const shoR = Math.floor((enemySquad.army.shooters || 0) * factor);
+        if (infR + cavR + shoR > 0) {
+            enemySquad.army.infantry = Math.max(0, (enemySquad.army.infantry || 0) - infR); enemySquad.army.cavalry = Math.max(0, (enemySquad.army.cavalry || 0) - cavR); enemySquad.army.shooters = Math.max(0, (enemySquad.army.shooters || 0) - shoR);
+            playerSquad.army.infantry += infR; playerSquad.army.cavalry += cavR; playerSquad.army.shooters += shoR;
+            log(`<span class="victory">Вербовка успешна: 🗡️${infR}, 🐎${cavR}, 🏹${shoR}.</span>`);
+        }
+    } else { log(`<span class="loss">Вербовка провалилась!</span>`); }
+    state.espionage.recruitCd = 3; render();
+}
+
+function uiRecruitSpecificSquad(playerSquadId, enemySquadId, ownerId) {
+    if (state.espionage.recruitCd > 0) return alert(`Вербовка на перезарядке. Осталось: ${state.espionage.recruitCd} х.`);
+    recruitFromEnemySquad(playerSquadId, enemySquadId, ownerId);
+}
+
+function showNeighbors() {
+    const body = document.getElementById('neighborsBody');
+    const aliveNeighbors = state.visitedCountryIds.filter(id => { const c = state.enemyCountries.find(ec => ec.id === id); return c && !c.captured; });
+    if (!aliveNeighbors || aliveNeighbors.length === 0) { body.innerHTML = '<p>Ваши отряды ещё не посещали живых стран.</p>'; openModal('neighborsModal'); return; }
+    let html = '';
+    for (const countryId of aliveNeighbors) {
+        const country = state.enemyCountries.find(c => c.id === countryId); if (!country) continue;
+        const totalArmy = getTotalArmySize(country);
+        const isPlayerAlly = state.allyId === country.id;
+        html += `<div style="background:#f8f9fa; border:1px solid #ddd; padding:12px; margin-bottom:12px; border-left:4px solid ${country.color}; border-radius:3px;">
+                <strong style="color:${country.color}">${country.name}</strong>${country.isDesert ? ' 🏜️' : ''}${country.isTitan ? ' 👹' : ''}${isPlayerAlly ? ' 🤝 (Союзник)' : ''}
+                <div style="font-size:12px; margin-top:5px;">💰${country.resources.gold} | 🍖${country.resources.food} | Армия: ${totalArmy}</div>
+                ${!isPlayerAlly && state.allyId === null && !country.isDesert && !country.isTitan ? `<button onclick="proposeAlliance(${country.id}); closeModal('neighborsModal');" style="margin-top:5px; font-size:12px;">🤝 Предложить союз</button>` : ''}
+                ${isPlayerAlly ? `<button onclick="breakAlliance(${country.id}); closeModal('neighborsModal');" style="margin-top:5px; font-size:12px; color:#c00;">💔 Разорвать союз</button>` : ''}
+            </div>`;
+    }
+    body.innerHTML = html; openModal('neighborsModal');
+}
+
+function shiftPositions(thresholdIdx, shiftAmt) {
+    state.worldMap.cells.forEach((c, i) => c.index = i);
+    if (state.homeBaseIndex > thresholdIdx) state.homeBaseIndex += shiftAmt;
+    if (state.focusSector > thresholdIdx) state.focusSector += shiftAmt;
+    state.squads.forEach(s => { if (s.position > thresholdIdx) s.position += shiftAmt; });
+    state.colonies.forEach(c => { if (c.position > thresholdIdx) c.position += shiftAmt; });
+    state.enemyCountries.forEach(ec => { if (ec.homeBaseIndex > thresholdIdx) ec.homeBaseIndex += shiftAmt; ec.squads.forEach(s => { if (s.position > thresholdIdx) s.position += shiftAmt; }); });
+}
+
+function buildRoad(squadId, direction) {
+    if (state.resources.wood < 50) return alert("Недостаточно дерева (нужно 50🌲)");
+    const squad = state.squads.find(s => s.id === squadId); if (!squad) return;
+    const targetIdx = squad.position + direction;
+    const cell = getCellAt(targetIdx);
+    if (cell && cell.objects.length === 0) {
+        state.resources.wood -= 50;
+        state.worldMap.cells.splice(targetIdx, 1);
+        shiftPositions(targetIdx, -1);
+        log(`🛣️ Отряд "${squad.name}" построил дорогу и сократил дистанцию!`);
+        render();
+    }
+}
+
+// Изм. #4: генерал страновой — применяется ко всем отрядам без назначения
+// Изм. #6: Титаны моментально захватывают страны
+// Изм. #25: Боты активнее захватывают пустыни, не стоят на месте
+// Изм. #1: Лог за захват пустыни только 1 раз
+function botAIAction(country) {
+    if (country.captured || country.isDesert) return;
+    if (country.botRecruitCd > 0) country.botRecruitCd--;
+    const aggressionLevel = Math.min(1.0, (country.turnsAlive || 0) / 30);
+
+    // Пассивный опыт генерала бота
+    if (country.general.hired) {
+        country.general.exp += 50 + Math.floor(aggressionLevel * 100);
+    }
+
+    let goldBudget = Math.floor(country.resources.gold * 0.95);
+
+    const maxInfantry = Math.floor(goldBudget / UNIT_COSTS.infantry.gold);
+    const canAffordInf = maxInfantry > 0 && country.resources.iron >= maxInfantry * UNIT_COSTS.infantry.iron && country.resources.food >= maxInfantry * UNIT_COSTS.infantry.food;
+    if (canAffordInf && maxInfantry > 0) {
+        country.resources.gold -= maxInfantry * UNIT_COSTS.infantry.gold;
+        country.resources.iron -= maxInfantry * UNIT_COSTS.infantry.iron;
+        country.resources.food -= maxInfantry * UNIT_COSTS.infantry.food;
+        country.army.infantry += maxInfantry;
+        goldBudget = Math.floor(country.resources.gold * 0.9);
+    } else {
+        const qty = country.resources.gold >= UNIT_COSTS.infantry.gold * 50 ? 50 : (country.resources.gold >= UNIT_COSTS.infantry.gold * 20 ? 20 : 0);
+        if (qty > 0) { country.resources.gold -= UNIT_COSTS.infantry.gold * qty; country.army.infantry += qty; goldBudget -= UNIT_COSTS.infantry.gold * qty; }
+    }
+
+    const cavQty = goldBudget >= UNIT_COSTS.cavalry.gold * 20 ? 20 : (goldBudget >= UNIT_COSTS.cavalry.gold * 10 ? 10 : (goldBudget >= UNIT_COSTS.cavalry.gold ? 1 : 0));
+    if (cavQty > 0) { country.resources.gold -= UNIT_COSTS.cavalry.gold * cavQty; country.army.cavalry += cavQty; goldBudget -= UNIT_COSTS.cavalry.gold * cavQty; }
+
+    const shoQty = goldBudget >= UNIT_COSTS.shooters.gold * 20 ? 20 : (goldBudget >= UNIT_COSTS.shooters.gold * 10 ? 10 : 0);
+    if (shoQty > 0) { country.resources.gold -= UNIT_COSTS.shooters.gold * shoQty; country.army.shooters += shoQty; }
+
+    if (country.buildings.university && country.resources.gold >= 200 && Math.random() < 0.4) {
+        const sciences = ['forestry', 'mining', 'ironMining'];
+        const targetScience = sciences[Math.floor(Math.random() * sciences.length)];
+        if (country.sciences[targetScience] < 100) {
+            country.resources.gold -= 200;
+            const progress = 5 + Math.floor(country.scientists / 10);
+            country.sciences[targetScience] = Math.min(100, country.sciences[targetScience] + progress);
+        }
+    }
+
+    while (country.squads.length < 3 && (country.army.infantry >= 50 || country.army.cavalry >= 10 || country.army.shooters >= 10)) {
+        const sName = generateBotSquadName();
+        const newSquad = { id: country.nextSquadId++, name: sName, ownerId: country.id, position: country.homeBaseIndex, army: { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 }, artifacts: [], capturingColony: null, capturingCountry: null, capturingOilField: null, hasRaidedThisTurn: false, wins: 0 };
+        const infT = Math.floor(country.army.infantry * 0.4); const cavT = Math.floor(country.army.cavalry * 0.4); const shoT = Math.floor(country.army.shooters * 0.4);
+        newSquad.army.infantry = infT; newSquad.army.cavalry = cavT; newSquad.army.shooters = shoT;
+        country.army.infantry -= infT; country.army.cavalry -= cavT; country.army.shooters -= shoT;
+        country.squads.push(newSquad);
+        getCellAt(newSquad.position).objects.push({ type: 'squad_enemy', squadId: newSquad.id, ownerId: country.id });
+        if (country.squads.length >= 3) break;
+    }
+
+    if (!country.farms) country.farms = [];
+    if (country.farms.length < Math.floor(country.land.plains / 100) && Math.random() < 0.3) country.farms.push({ turnsActive: 0 });
+    if (country.land.forests > 0 && country.resources.wood < 500 && Math.random() < 0.3) { country.land.forests--; country.resources.wood += 50; }
+
+    // Боты разрабатывают нефть
+    if (!country.oilFields) country.oilFields = [];
+    if (country.oilFields.length < 2 && Math.random() < 0.05) {
+        const swampCells = state.worldMap.cells.filter(cell => cell.objects.find(o => o.type === 'swamp') && !state.enemyCountries.some(c => c.oilFields && c.oilFields.some(f => f.cellIndex === cell.index)));
+        if (swampCells.length > 0) {
+            const sc = swampCells[Math.floor(Math.random() * swampCells.length)];
+            country.oilFields.push({ cellIndex: sc.index, developTurnsLeft: OIL_FIELD_DEVELOP_TURNS, developed: false, accumulated: 0, capacity: 0 });
+            sc.objects.push({ type: 'oil_field', ownerId: country.id, cellIndex: sc.index });
+        }
+    }
+
+    for (const squad of country.squads) {
+        const currentCell = getCellAt(squad.position);
+        if (!currentCell) continue;
+
+        const playerSquadInCell = currentCell.objects.find(o => o.type === 'squad_player');
+        const neutralColonyInCell = currentCell.objects.find(o => o.type === 'colony' && state.colonies.find(c => c.id === o.id)?.ownerId === null);
+        const playerBaseInCell = currentCell.objects.find(o => o.type === 'player_base');
+        const enemyBaseInCell = currentCell.objects.find(o => o.type === 'country_base' && o.id !== country.id && !state.enemyCountries.find(ec => ec.id === o.id)?.captured);
+        const isAlliedWithPlayer = country.allyId === -1;
+
+        // Изм. #6: Титаны захватывают немедленно
+        if (country.isTitan) {
+            if (playerBaseInCell && !isAlliedWithPlayer) {
+                // Немедленный захват базы игрока
+                const buildingKeys = Object.keys(state.buildings).filter(b => state.buildings[b] > 0);
+                if (buildingKeys.length > 0) {
+                    const bk = buildingKeys[Math.floor(Math.random() * buildingKeys.length)];
+                    state.buildings[bk] = 0;
+                    log(`<span class="loss">👹 ТИТАН ${country.name} разрушил ваше здание: ${getBuildingName(bk)}!</span>`);
+                }
+            } else if (enemyBaseInCell) {
+                const targetCountry = state.enemyCountries.find(ec => ec.id === enemyBaseInCell.id);
+                if (targetCountry && !targetCountry.captured) {
+                    targetCountry.captured = true;
+                    country.resources.gold += targetCountry.resources.gold;
+                    country.resources.food += targetCountry.resources.food;
+                    targetCountry.squads = [];
+                    const bc = getCellAt(targetCountry.homeBaseIndex);
+                    if (bc) bc.objects = bc.objects.filter(o => o.type !== 'country_base' || o.id !== targetCountry.id);
+                    log(`<span class="loss">👹 Титан ${country.name} захватил ${targetCountry.name}!</span>`);
+                }
+            }
+            // Изм. #6: Боты тоже захватывают немедленно (для обычных ботов — ниже)
+        } else if (playerBaseInCell || enemyBaseInCell) {
+            if (playerBaseInCell && !isAlliedWithPlayer) {
+                if (!squad.capturingCountry) {
+                    squad.capturingCountry = { countryId: null, countryPos: state.homeBaseIndex, turnsRemaining: COUNTRY_CAPTURE_TURNS, buildingsToRaid: Object.keys(state.buildings).filter(b => state.buildings[b] > 0) };
+                    log(`<span class="loss">⚠️ Отряд "${squad.name}" (${country.name}) начинает захват вашей базы!</span>`);
+                } else if (squad.capturingCountry.countryId === null) {
+                    squad.capturingCountry.turnsRemaining--;
+                    if (squad.capturingCountry.turnsRemaining <= 0) {
+                        const bk = squad.capturingCountry.buildingsToRaid && squad.capturingCountry.buildingsToRaid.length > 0 ? squad.capturingCountry.buildingsToRaid[0] : null;
+                        if (bk && state.buildings[bk]) { state.buildings[bk] = 0; log(`<span class="loss">🏴 ${country.name} разрушила ${getBuildingName(bk)}!</span>`); }
+                        squad.capturingCountry = null;
+                    }
+                }
+            } else if (enemyBaseInCell) {
+                const targetCountryId = enemyBaseInCell.id;
+                const targetCountry = state.enemyCountries.find(ec => ec.id === targetCountryId);
+                if (targetCountry && !targetCountry.captured && targetCountry.allyId !== country.id) {
+                    if (!squad.capturingCountry) {
+                        squad.capturingCountry = { countryId: targetCountryId, countryPos: targetCountry.homeBaseIndex, turnsRemaining: COUNTRY_CAPTURE_TURNS, buildingsToRaid: [] };
+                    } else if (squad.capturingCountry.countryId === targetCountryId) {
+                        squad.capturingCountry.turnsRemaining--;
+                        if (squad.capturingCountry.turnsRemaining <= 0) {
+                            targetCountry.captured = true;
+                            country.resources.gold += targetCountry.resources.gold;
+                            country.resources.food += targetCountry.resources.food;
+                            country.land.total += targetCountry.land.total;
+                            country.captures = (country.captures || 0) + 1;
+                            targetCountry.squads.forEach(es => { const sc = getCellAt(es.position); if (sc) sc.objects = sc.objects.filter(o => !(o.type === 'squad_enemy' && o.squadId === es.id)); });
+                            targetCountry.squads = [];
+                            const bc = getCellAt(targetCountry.homeBaseIndex);
+                            if (bc) bc.objects = bc.objects.filter(o => o.type !== 'country_base' || o.id !== targetCountry.id);
+                            // Изм. #1: лог захвата только один раз
+                            if (!targetCountry.isDesert) {
+                                log(`<span class="loss">⚠️ ${country.name} захватила ${targetCountry.name}!</span>`);
+                            } else {
+                                log(`<span class="loss">🏜️ ${country.name} захватила пустыню ${targetCountry.name}.</span>`);
+                            }
+                            squad.capturingCountry = null;
+                        }
+                    }
+                }
+            }
+            continue;
+        } else if (neutralColonyInCell) {
+            const tColonyId = neutralColonyInCell.id;
+            const colony = state.colonies.find(c => c.id === tColonyId);
+            if (colony) { if (!squad.capturingColony) squad.capturingColony = { colonyId: colony.id, colonyPos: colony.position, turnsRemaining: COLONY_CAPTURE_TURNS }; else { squad.capturingColony.turnsRemaining--; if (squad.capturingColony.turnsRemaining <= 0) { colony.ownerId = country.id; squad.capturingColony = null; } } }
+            continue;
+        }
+
+        if (squad.capturingCountry && squad.position === squad.capturingCountry.countryPos) continue;
+        if (squad.capturingColony && squad.position === squad.capturingColony.colonyPos) continue;
+        squad.capturingCountry = null;
+        squad.capturingColony = null;
+
+        // Изм. #25: Боты активно ищут пустыни и не простаивают
+        const moveDir = getBotMoveDirection(country, squad, aggressionLevel);
+        const moveStep = 3 + Math.floor(aggressionLevel * 2);
+        const newPos = squad.position + (moveDir * moveStep);
+
+        if (newPos >= 0 && newPos < state.worldMap.cells.length) {
+            const oldCell = getCellAt(squad.position);
+            if (oldCell) oldCell.objects = oldCell.objects.filter(o => !(o.type === 'squad_enemy' && o.squadId === squad.id));
+            squad.position = newPos;
+            const newCell = getCellAt(newPos);
+            if (newCell) {
+                newCell.objects.push({ type: 'squad_enemy', squadId: squad.id, ownerId: country.id });
+
+                // Болото — зима без потерь
+                if (newCell.objects.find(o => o.type === 'swamp') && state.season !== 'winter') {
+                    squad.army.infantry = Math.max(0, Math.floor(squad.army.infantry * 0.8));
+                    squad.army.cavalry = Math.max(0, Math.floor(squad.army.cavalry * 0.8));
+                    squad.army.shooters = Math.max(0, Math.floor(squad.army.shooters * 0.8));
+                }
+
+                const activeGarrison = newCell.objects.find(o => o.type === 'garrison' && !o.defeated);
+                if (activeGarrison) {
+                    const P_bot = getArmyPower(squad.army.infantry, squad.army.cavalry, squad.army.shooters, country.general.hired ? country.general : null, squad.army.tanks, squad);
+                    const P_gar = getArmyPower(0, 0, 0, null, activeGarrison.tanks, { army: { infantry: 0, cavalry: 0, shooters: 0, tanks: activeGarrison.tanks }, artifacts: [], wins: 0 });
+                    const winChance = P_gar > 0 ? P_bot / (P_bot + P_gar) : 1;
+                    if (winChance >= 0.8) {
+                        const br = resolveGarrisonBattle(squad, activeGarrison, newCell, false);
+                        if (br && br.isSquadDestroyed) continue;
+                    } else {
+                        newCell.objects = newCell.objects.filter(o => !(o.type === 'squad_enemy' && o.squadId === squad.id));
+                        squad.position = oldCell ? oldCell.index : country.homeBaseIndex;
+                        const retreatCell = getCellAt(squad.position);
+                        if (retreatCell) retreatCell.objects.push({ type: 'squad_enemy', squadId: squad.id, ownerId: country.id });
+                        continue;
+                    }
+                }
+
+                const activeTitan = newCell.objects.find(o => o.type === 'titan');
+                if (activeTitan) {
+                    const br2 = resolveTitanBattle(squad, activeTitan, newCell, false);
+                    if (br2 && br2.isSquadDestroyed) continue;
+                }
+            }
+        }
+    }
+}
+
+// Изм. #25: направление движения бота — приоритет пустыням
+function getBotMoveDirection(country, squad, aggressionLevel) {
+    const pArmy = getTotalArmySize(state);
+    const bArmy = getTotalArmySize(country);
+
+    // Ищем ближайшую пустыню (изм. #25)
+    let bestDist = Infinity; let bestDir = 0;
+    const deserts = state.enemyCountries.filter(c => c.isDesert && !c.captured);
+    for (const d of deserts) {
+        const dist = Math.abs(squad.position - d.homeBaseIndex);
+        if (dist < bestDist) { bestDist = dist; bestDir = d.homeBaseIndex > squad.position ? 1 : -1; }
+    }
+
+    // 40% шанс идти к пустыне
+    if (bestDir !== 0 && Math.random() < 0.4) return bestDir;
+
+    // Идти к игроку или врагу
+    const targetPlayerBase = (bArmy > pArmy * (1.0 - aggressionLevel * 0.5) || Math.random() < 0.3 + aggressionLevel * 0.5) && !state.gameOver;
+    if (targetPlayerBase) return state.homeBaseIndex > squad.position ? 1 : -1;
+
+    let bestTargetDist = Infinity; let bestTargetDir = 0;
+    for (const otherCountry of state.enemyCountries) {
+        if (otherCountry.id === country.id || otherCountry.captured || otherCountry.id === country.allyId) continue;
+        const dist = Math.abs(squad.position - otherCountry.homeBaseIndex);
+        if (dist < bestTargetDist) { bestTargetDist = dist; bestTargetDir = otherCountry.homeBaseIndex > squad.position ? 1 : -1; }
+    }
+    if (bestTargetDir !== 0) return bestTargetDir;
+    return Math.random() < 0.5 ? -1 : 1;
+}
+
+function botTryFormAlliance(country) {
+    if (country.allyId !== null || Math.random() > 0.02) return;
+    const candidates = state.enemyCountries.filter(c => !c.captured && c.id !== country.id && c.allyId === null && !c.isDesert && !c.isTitan);
+    if (candidates.length === 0) return;
+    const ally = candidates[Math.floor(Math.random() * candidates.length)];
+    country.allyId = ally.id; ally.allyId = country.id;
+}
+
+function botTransferToAlly(country) {
+    if (!country.allyId || country.allyId === -1) return;
+    const ally = state.enemyCountries.find(c => c.id === country.allyId);
+    if (!ally || ally.captured) return;
+    if (Math.random() < 0.1 && country.resources.gold > 1000) {
+        const transfer = Math.floor(country.resources.gold * 0.05);
+        country.resources.gold -= transfer; ally.resources.gold += transfer;
+    }
+}
+
+function getTotalArmySize(countryState) {
+    let total = 0;
+    if (countryState.army) total += (countryState.army.infantry || 0) + (countryState.army.cavalry || 0) + (countryState.army.shooters || 0) + (countryState.army.tanks || 0);
+    if (countryState.squads) countryState.squads.forEach(sq => total += (sq.army.infantry || 0) + (sq.army.cavalry || 0) + (sq.army.shooters || 0) + (sq.army.tanks || 0));
+    return total;
+}
+
+function showLeaders() {
+    const body = document.getElementById('leadersBody');
+    let allCountries = [
+        { name: state.name, color: state.color, gold: state.resources.gold, land: state.land.total, army: getTotalArmySize(state), captures: state.captures || 0 },
+        ...state.enemyCountries.filter(c => !c.captured).map(c => ({ name: c.name, color: c.color, gold: c.resources.gold, land: c.land.total, army: getTotalArmySize(c), captures: c.captures || 0 }))
+    ];
+    const richest = [...allCountries].sort((a, b) => b.gold - a.gold).slice(0, 5);
+    const largestArmy = [...allCountries].sort((a, b) => b.army - a.army).slice(0, 5);
+    const largestLand = [...allCountries].sort((a, b) => b.land - a.land).slice(0, 5);
+    const warlike = [...allCountries].sort((a, b) => b.captures - a.captures).slice(0, 5);
+
+    let allGenerals = [];
+    if (state.general.hired) allGenerals.push({ name: state.general.name, country: state.name, color: state.color, skill: state.general.skill, exp: state.general.exp });
+    state.enemyCountries.filter(c => !c.captured && c.general.hired).forEach(c => {
+        allGenerals.push({ name: c.general.name, country: c.name, color: c.color, skill: c.general.skill, exp: c.general.exp });
+    });
+    allGenerals.sort((a, b) => b.exp - a.exp);
+    const topGenerals = allGenerals.slice(0, 5);
+    const topBattles = (state.topBattles || []).slice(0, 5);
+
+    let html = `<div class="row" style="align-items: flex-start; gap: 20px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:150px;"><h4>💰 Богатейшие</h4><ol>${richest.map(c => `<li style="color:${c.color}">${c.name} (${c.gold}💰)</li>`).join('')}</ol></div>
+        <div style="flex:1; min-width:150px;"><h4>🗡️ Большие армии</h4><ol>${largestArmy.map(c => `<li style="color:${c.color}">${c.name} (${c.army})</li>`).join('')}</ol></div>
+        <div style="flex:1; min-width:150px;"><h4>🏞️ Большие земли</h4><ol>${largestLand.map(c => `<li style="color:${c.color}">${c.name} (${c.land})</li>`).join('')}</ol></div>
+        <div style="flex:1; min-width:150px;"><h4>🔥 Воинственные</h4><ol>${warlike.map(c => `<li style="color:${c.color}">${c.name} (${c.captures} захв.)</li>`).join('')}</ol></div>
+        <div style="flex:1; min-width:150px;"><h4>🌟 Генералы</h4><ol>${topGenerals.length > 0 ? topGenerals.map(g => `<li style="color:${g.color}">${g.name}<br><small>Навык: ${g.skill} | Опыт: ${g.exp}</small></li>`).join('') : '<li>Нет</li>'}</ol></div>
+        <div style="flex:1; min-width:200px;"><h4>🏆 Эпические битвы</h4><ol>${topBattles.length > 0 ? topBattles.map(b => `<li>${b.squad1}<br>vs ${b.squad2}<br><small>Опыт: ${b.totalExp} | Ход ${b.turn}</small></li>`).join('') : '<li>Битв пока нет</li>'}</ol></div>
+    </div>`;
+    body.innerHTML = html; openModal('leadersModal');
+}
+
+function updateMarketDisplay() {
+    const el = document.getElementById('marketPriceInfo');
+    if (!el) return;
+    const fmt = (x) => Math.round(x * 10) / 10;
+    el.innerHTML = `<strong>Текущие цены (динамические):</strong><br>
+        🍖 Еда: Купить <b>${fmt(marketState.food.price)}💰</b>, Продать <b>${fmt(marketState.food.price * 0.7)}💰</b> | Запас: ${Math.floor(marketState.food.supply)} / ${Math.floor(marketState.food.maxSupply)}<br>
+        ⛏️ Железо: Купить <b>${fmt(marketState.iron.price)}💰</b>, Продать <b>${fmt(marketState.iron.price * 0.7)}💰</b> | Запас: ${Math.floor(marketState.iron.supply)} / ${Math.floor(marketState.iron.maxSupply)}<br>
+        🌲 Дерево: Купить <b>${fmt(marketState.wood.price)}💰</b>, Продать <b>${fmt(marketState.wood.price * 0.7)}💰</b> | Запас: ${Math.floor(marketState.wood.supply)} / ${Math.floor(marketState.wood.maxSupply)}`;
+}
+
+function showMarketModal() {
+    document.getElementById('marketGold').innerText = state.resources.gold;
+    updateMarketDisplay();
+    openModal('marketModal');
+}
+
+function uiTradeResource(action, resource, inputId) {
+    const qty = parseInt(document.getElementById(inputId).value);
+    if (!qty || qty <= 0) return alert("Введите корректное количество.");
+    const mkt = marketState[resource];
+
+    if (!mkt) {
+        const price = PRICES[resource][action];
+        if (action === 'buy') {
+            const totalCost = qty * price; if (state.resources.gold < totalCost) return alert(`Нужно ${totalCost}💰.`);
+            state.resources.gold -= totalCost; state.resources[resource] += qty;
+        } else {
+            if (state.resources[resource] < qty) return alert(`Недостаточно!`);
+            state.resources[resource] -= qty; state.resources.gold += qty * price;
+        }
+    } else {
+        const buyPrice = Math.ceil(mkt.price);
+        const sellPrice = Math.floor(mkt.price * 0.7);
+
+        if (action === 'buy') {
+            if (mkt.supply < qty) return alert(`На рынке доступно: ${Math.floor(mkt.supply)}.`);
+            const totalCost = qty * buyPrice;
+            if (state.resources.gold < totalCost) return alert(`Нужно ${totalCost}💰.`);
+            state.resources.gold -= totalCost; state.resources[resource] += qty;
+            mkt.supply -= qty;
+            mkt.price = Math.min(mkt.basePrice * 5, mkt.price * (1 + (qty / mkt.maxSupply) * 3));
+            mkt.demand = (mkt.demand || 0) + 1;
+        } else {
+            if (state.resources[resource] < qty) return alert(`Недостаточно для продажи!`);
+            const totalGain = qty * sellPrice;
+            state.resources[resource] -= qty; state.resources.gold += totalGain;
+            mkt.supply = Math.min(mkt.maxSupply, mkt.supply + qty);
+            mkt.price = Math.max(mkt.basePrice * 0.2, mkt.price * (1 - (qty / mkt.maxSupply) * 3));
+        }
+        state.warActivity = (state.warActivity || 0) + 0.5;
+    }
+    updateMarketDisplay();
+    document.getElementById('marketGold').innerText = state.resources.gold;
+    render();
+}
+
+function showVillageModal() {
+    document.getElementById('availableMountains').innerText = state.land.mountains;
+    document.getElementById('ironMiningLevel').innerText = state.sciences.ironMining;
+    document.getElementById('ironPerMountain').innerText = Math.floor((3 + Math.floor(state.sciences.ironMining / 100 * 7)) * (1 + (state.ironBonus || 0)));
+    document.getElementById('availableForests').innerText = state.land.forests;
+    document.getElementById('forestryLevel').innerText = state.sciences.forestry;
+    document.getElementById('woodPerForest').innerText = Math.floor((50 + Math.floor(state.sciences.forestry / 100 * 50)) * (1 + (state.woodBonus || 0)));
+    const maxFarms = Math.floor(state.land.plains / 100);
+    document.getElementById('availablePlainsForFarms').innerText = maxFarms - state.farms.length;
+    document.getElementById('activeFarmsCount').innerText = state.farms.length;
+    document.getElementById('landStatsDisplay').innerHTML = `<h4>Ваши земли (${state.land.total} ед.)</h4><p>Горы: ${state.land.mountains} | Леса: ${state.land.forests} | Равнины: ${state.land.plains}</p><p>Рабочих: <strong>${state.workers}</strong></p>`;
+    const wEl = document.getElementById('villageWorkers'); if (wEl) wEl.innerText = state.workers;
+
+    // Изм. #14: список месторождений для назначения рабочих
+    const oilDevList = document.getElementById('oilDevelopWorkersList');
+    if (oilDevList) {
+        const undeveloped = state.oilFields.filter(f => !f.developed);
+        if (undeveloped.length === 0) {
+            oilDevList.innerHTML = '<p style="font-size:12px; color:#888;">Нет месторождений в разработке.</p>';
+        } else {
+            oilDevList.innerHTML = undeveloped.map(f =>
+                `<div class="capture-info">Месторождение сектор ${f.cellIndex}: ещё ${f.developTurnsLeft} ходов. Рабочих: ${f.assignedWorkers || 0}.<br>
+                <input type="number" id="oilWorkers_${f.cellIndex}" class="qty-input" value="100" min="100" step="100">
+                <button onclick="assignWorkersToOilField(${f.cellIndex}, parseInt(document.getElementById('oilWorkers_${f.cellIndex}').value))">Назначить рабочих</button></div>`
+            ).join('');
+        }
+    }
+    openModal('villageModal');
+}
+
+function mineIron() {
+    const qty = parseInt(document.getElementById('mineIronQty').value) || 1;
+    if (qty <= 0) return alert("Введите корректное количество.");
+    if (state.land.mountains < qty) return alert(`У вас только ${state.land.mountains} гор.`);
+    const ironPerMountain = Math.floor((3 + Math.floor(state.sciences.ironMining / 100 * 7)) * (1 + (state.ironBonus || 0)));
+    state.land.mountains -= qty; state.resources.iron += ironPerMountain * qty;
+    showVillageModal(); render();
+}
+
+function chopWood() {
+    const qty = parseInt(document.getElementById('chopWoodQty').value) || 1;
+    if (qty <= 0) return alert("Введите корректное количество.");
+    if (state.land.forests < qty) return alert(`У вас только ${state.land.forests} лесов.`);
+    const woodGained = Math.floor((50 + Math.floor(state.sciences.forestry / 100 * 50)) * (1 + (state.woodBonus || 0))) * qty;
+    state.land.forests -= qty; state.resources.wood += woodGained;
+    showVillageModal(); render();
+}
+
+function buildFarm() {
+    const qty = parseInt(document.getElementById('buildFarmQty').value) || 1;
+    if (qty <= 0) return alert("Введите корректное количество.");
+    const maxFarms = Math.floor(state.land.plains / 100);
+    if (state.farms.length + qty > maxFarms) return alert(`Можно построить ещё ${maxFarms - state.farms.length} ферм.`);
+    const cost = qty * 200;
+    if (state.resources.gold < cost) return alert(`Нужно ${cost}💰.`);
+    state.resources.gold -= cost;
+    for (let i = 0; i < qty; i++) state.farms.push({ turnsActive: 0 });
+    showVillageModal(); render();
+}
+
+function moveCountriesAndDevelop() {
+    for (const country of state.enemyCountries) {
+        if (country.captured) continue;
+        if (country.isDesert) { processOilFields(country, country.name); continue; }
+        country.turnsAlive = (country.turnsAlive || 0) + 1;
+        if (country.immunityTurns > 0) country.immunityTurns--;
+        country.resources.gold += 100 + (country.land.total * 5);
+        processFarms(country);
+        processOilFields(country, country.name);
+
+        // Рост рабочих у ботов
+        if (!country.workers) country.workers = 100;
+        country.workers += Math.floor(country.workers * 0.02);
+
+        let expectedFood = 0;
+        expectedFood += (country.army.infantry || 0) + (country.army.cavalry || 0) + (country.army.shooters || 0) + (country.army.tanks || 0) * 3;
+        country.squads.forEach(sq => { expectedFood += (sq.army.infantry || 0) + (sq.army.cavalry || 0) + (sq.army.shooters || 0) + (sq.army.tanks || 0) * 3; });
+
+        if (country.resources.food < expectedFood) {
+            const deficit = expectedFood - country.resources.food;
+            const cost = deficit * PRICES.food.buy;
+            if (country.resources.gold >= cost) { country.resources.gold -= cost; country.resources.food += deficit + 20; }
+        }
+
+        botUseArtifacts(country);
+        if (state.gameOver) return;
+        botTryFormAlliance(country);
+        botTransferToAlly(country);
+        botAIAction(country);
+
+        let upkeepGold = 0;
+        upkeepGold += (country.army.infantry || 0) * 1 + (country.army.cavalry || 0) * 2 + (country.army.shooters || 0) * 3 + (country.army.tanks || 0) * 10;
+        country.squads.forEach(sq => { upkeepGold += (sq.army.infantry || 0) * 1 + (sq.army.cavalry || 0) * 2 + (sq.army.shooters || 0) * 3 + (sq.army.tanks || 0) * 10; });
+        country.resources.gold -= upkeepGold; country.resources.food -= expectedFood;
+        if (country.resources.food < 0) country.resources.food = 0;
+        if (country.resources.gold < 0) country.resources.gold = 0;
+
+        // Изм. #10: доход с колоний ботов
+        for (let i = state.colonies.length - 1; i >= 0; i--) {
+            const colony = state.colonies[i];
+            if (colony.ownerId === country.id || colony.ownerId === country.name) {
+                if (colony.type === 'resource') {
+                    const goldInc = 10000 + Math.floor(Math.random() * 5001);
+                    const ironInc = 3000 + Math.floor(Math.random() * 2001);
+                    const oilInc = 1000 + Math.floor(Math.random() * 501);
+                    country.resources.gold += goldInc;
+                    country.resources.iron += ironInc;
+                    country.resources.oil = (country.resources.oil || 0) + oilInc;
+                    // Изм. #11: шанс получить артефакт
+                    if (Math.random() < 0.005) {
+                        const artKey = TITAN_ARTIFACT_KEYS[Math.floor(Math.random() * TITAN_ARTIFACT_KEYS.length)];
+                        if (country.squads.length > 0) {
+                            if (!country.squads[0].artifacts) country.squads[0].artifacts = [];
+                            country.squads[0].artifacts.push(artKey);
+                        }
+                    }
+                } else {
+                    country.army.infantry += 10; country.army.cavalry += 5; country.army.shooters += 5;
+                }
+            }
+        }
+    }
+}
+
+function resolveSquadBattles() {
+    for (const cell of state.worldMap.cells) {
+        const playerSquadObjs = cell.objects.filter(o => o.type === 'squad_player');
+        const enemySquadObjs = cell.objects.filter(o => o.type === 'squad_enemy');
+
+        if (playerSquadObjs.length === 0 || enemySquadObjs.length === 0) continue;
+
+        for (const pso of [...playerSquadObjs]) {
+            const pSquad = state.squads.find(s => s.id === pso.squadId);
+            if (!pSquad) continue;
+
+            for (const eso of [...enemySquadObjs]) {
+                const ec = state.enemyCountries.find(c => c.id === eso.ownerId);
+                if (!ec || ec.captured) continue;
+                const eSquad = ec.squads.find(s => s.id === eso.squadId);
+                if (!eSquad) continue;
+                if (state.allyId === ec.id) continue;
+                if (!state.general.hired) continue;
+
+                state.warActivity = (state.warActivity || 0) + 1;
+                const battleResult = resolveBattle(pSquad, eSquad, state, ec);
+                let logMsg = `⚔️ <b>Авто-бой (Сектор ${cell.index})</b>: "${pSquad.name}" vs "${eSquad.name}" (${ec.name}). `;
+                // Изм. #3: опыт при любом исходе
+                if (state.general.hired && battleResult.expGainedFor1 > 0) { state.general.exp += battleResult.expGainedFor1; }
+                if (ec.general.hired && battleResult.expGainedFor2 > 0) { ec.general.exp += battleResult.expGainedFor2; }
+                if (battleResult.winner === 'player') logMsg += `<span class="victory">Победа!</span>`;
+                else logMsg += `<span class="loss">Поражение!</span>`;
+                log(logMsg);
+                applyLossesAndCheckDestruction(pSquad, battleResult.losses1, 'player', cell);
+                const eSquadWasAlive = ec.squads.includes(eSquad);
+                applyLossesAndCheckDestruction(eSquad, battleResult.losses2, 'enemy', cell, ec);
+                // Трофеи с Титана при уничтожении его отряда в авто-бою
+                if (battleResult.winner === 'player' && ec.isTitan && eSquadWasAlive && !ec.squads.includes(eSquad)) {
+                    log(`👹 <span class="victory">Авто-бой: отряд Титана уничтожен! Проверяем трофеи...</span>`);
+                    rollTitanTrophies(pSquad);
+                }
+                break;
+            }
+        }
+    }
+}
+
+// Изм. #23: союз бесплатный, основан на взаимной выгоде
+function proposeAlliance(countryId) {
+    const country = state.enemyCountries.find(c => c.id === countryId);
+    if (!country || country.captured || country.isDesert || country.isTitan) return alert('Союз невозможен.');
+    if (state.allyId !== null) return alert('У вас уже есть союзник. Сначала разорвите.');
+    // Взаимная выгода: страна соглашается если не в невыгодном положении
+    const playerArmy = getTotalArmySize(state);
+    const botArmy = getTotalArmySize(country);
+    if (botArmy > playerArmy * 3) return alert(`${country.name} отклонила союз — ваша армия слишком слаба.`);
+    state.allyId = countryId; country.allyId = -1;
+    log(`🤝 Союз заключён с <span style="color:${country.color}">${country.name}</span>!`);
+    render();
+}
+
+function breakAlliance(countryId) {
+    const country = state.enemyCountries.find(c => c.id === countryId);
+    if (country && country.allyId === -1) country.allyId = null;
+    state.allyId = null; log(`💔 Союз разорван.`); render();
+}
+
+function openHomeGuardModal() {
+    const g = state.homeGuard; const body = document.getElementById('homeGuardBody');
+    body.innerHTML = `<p>Армия базы: 🗡️ ${state.army.infantry} 🐎 ${state.army.cavalry} 🏹 ${state.army.shooters} 🚗 ${state.army.tanks || 0}</p>
+        <p>Текущая охрана: 🗡️ ${g.infantry} 🐎 ${g.cavalry} 🏹 ${g.shooters} 🚗 ${g.tanks || 0}</p>
+        <div class="row"><input type="number" id="guard_infantry" class="qty-input" value="0"><span>Пехота</span></div>
+        <div class="row"><input type="number" id="guard_cavalry" class="qty-input" value="0"><span>Кавалерия</span></div>
+        <div class="row"><input type="number" id="guard_shooters" class="qty-input" value="0"><span>Стрелки</span></div>
+        <div class="row"><input type="number" id="guard_tanks" class="qty-input" value="0"><span>Танки</span></div>
+        <div class="row" style="margin-top:10px;"><button class="primary" onclick="setHomeGuard()">Назначить</button> <button onclick="recallHomeGuard()">Отозвать</button></div>`;
+    openModal('homeGuardModal');
+}
+
+function setHomeGuard() {
+    const inf = parseInt(document.getElementById('guard_infantry').value) || 0; const cav = parseInt(document.getElementById('guard_cavalry').value) || 0;
+    const sho = parseInt(document.getElementById('guard_shooters').value) || 0; const tan = parseInt(document.getElementById('guard_tanks').value) || 0;
+    if (inf < 0 || cav < 0 || sho < 0 || tan < 0) return alert('Не может быть отрицательным!');
+    if (inf > state.army.infantry || cav > state.army.cavalry || sho > state.army.shooters || tan > (state.army.tanks || 0)) return alert('Недостаточно войск!');
+    state.army.infantry -= inf; state.army.cavalry -= cav; state.army.shooters -= sho; state.army.tanks = (state.army.tanks || 0) - tan;
+    state.homeGuard.infantry += inf; state.homeGuard.cavalry += cav; state.homeGuard.shooters += sho; state.homeGuard.tanks = (state.homeGuard.tanks || 0) + tan;
+    log(`🛡️ Охрана базы назначена.`);
+    closeModal('homeGuardModal'); render();
+}
+
+function recallHomeGuard() {
+    state.army.infantry += state.homeGuard.infantry; state.army.cavalry += state.homeGuard.cavalry;
+    state.army.shooters += state.homeGuard.shooters; state.army.tanks = (state.army.tanks || 0) + (state.homeGuard.tanks || 0);
+    state.homeGuard = { infantry: 0, cavalry: 0, shooters: 0, tanks: 0 };
+    log('🛡️ Охрана базы отозвана.'); closeModal('homeGuardModal'); render();
+}
+
+function openUnknownArtifactsModal() {
+    const body = document.getElementById('unknownArtifactsBody');
+    if (!state.unknownArtifacts || state.unknownArtifacts.length === 0) { body.innerHTML = '<p>Нет неизвестных артефактов.</p>'; openModal('unknownArtifactsModal'); return; }
+    if (!state.buildings.university) { alert('Для исследования нужен Университет!'); return; }
+    let html = '';
+    state.unknownArtifacts.forEach(ua => {
+        const researchTurns = Math.max(1, Math.ceil(10 - (state.scientists / 20)));
+        const researchCost = 500;
+        const squad = state.squads.find(s => s.id === ua.squadId);
+        const squadName = squad ? squad.name : '?';
+        if (ua.researching) {
+            html += `<div class="capture-info"><strong>❓ Неизвестный артефакт</strong> (для "${squadName}")<br><small>Осталось ${ua.researchTurnsLeft} ходов.</small></div>`;
+        } else {
+            html += `<div class="capture-info"><strong>❓ Неизвестный артефакт</strong> (для "${squadName}")<br><small>Стоимость: ${researchCost}💰. ~${researchTurns} ходов.</small><br><button onclick="startArtifactResearch(${ua.id})">🔍 Исследовать</button></div>`;
+        }
+    });
+    body.innerHTML = html; openModal('unknownArtifactsModal');
+}
+
+function startArtifactResearch(unknownId) {
+    const ua = state.unknownArtifacts.find(a => a.id === unknownId); if (!ua) return;
+    if (ua.researching) return alert("Уже исследуется.");
+    const researchCost = 500;
+    if (state.resources.gold < researchCost) return alert(`Нужно ${researchCost}💰.`);
+    state.resources.gold -= researchCost;
+    ua.researching = true; ua.researchTurnsLeft = Math.max(1, Math.ceil(10 - (state.scientists / 20)));
+    openUnknownArtifactsModal(); render();
+}
+
+function showSquadArtifacts(squadId) {
+    const squad = state.squads.find(s => s.id === squadId); if (!squad) return;
+    const body = document.getElementById('artifactsBody');
+    const arts = squad.artifacts || [];
+    if (arts.length === 0) { body.innerHTML = '<p>У этого отряда нет артефактов.</p>'; openModal('artifactsModal'); return; }
+    let html = `<h4>Артефакты отряда "${squad.name}"</h4>`;
+    if (hasTitanSet(squad)) html += `<div style="background:#fff3cd; padding:8px; border-radius:4px; margin-bottom:8px;"><strong>🌟 КОМПЛЕКТ ТИТАНА АКТИВЕН — Сила ×3!</strong></div>`;
+    const artCounts = {};
+    arts.forEach(a => artCounts[a] = (artCounts[a] || 0) + 1);
+    for (const key of Object.keys(artCounts)) {
+        const art = ARTIFACTS[key];
+        if (!art) continue;
+        html += `<div style="background:#f8f9fa; border:1px solid #ddd; padding:10px; margin-bottom:8px; border-radius:4px;"><strong>${art.icon} ${art.name}</strong> x${artCounts[key]}<br><small style="color:#666;">${art.desc}</small><br>`;
+        if (key === 'atomic_bomb') {
+            const aliveCountries = state.enemyCountries.filter(c => !c.captured);
+            if (aliveCountries.length > 0) {
+                html += `<div style="margin-top:5px;">Уничтожить:<br>`;
+                aliveCountries.forEach(c => { html += `<button onclick="useAtomicBomb(${squadId}, ${c.id}); closeModal('artifactsModal');" style="margin:2px;">${c.name}</button>`; });
+                html += `</div>`;
+            }
+        }
+        if (key === 'levitation_boots') {
+            html += `<div style="margin-top:5px;">Сектор: <input type="number" id="teleport_target_${squadId}" class="qty-input" value="${state.homeBaseIndex}"> <button onclick="useLevitationBoots(${squadId}, parseInt(document.getElementById('teleport_target_${squadId}').value)); closeModal('artifactsModal');">Телепорт</button></div>`;
+        }
+        if (key === 'titan_boot') {
+            html += `<div style="margin-top:5px;">Сектор: <input type="number" id="titanboot_target_${squadId}" class="qty-input" value="${state.homeBaseIndex}"> <button onclick="useTitanBoot(${squadId}, parseInt(document.getElementById('titanboot_target_${squadId}').value)); closeModal('artifactsModal');">Телепорт (навсегда)</button></div>`;
+        }
+        html += `</div>`;
+    }
+    body.innerHTML = html; openModal('artifactsModal');
+}
+
+function showColonies() {
+    const body = document.getElementById('coloniesBody'); const playerColonies = state.colonies.filter(c => c.ownerId === state.name);
+    if (playerColonies.length === 0) body.innerHTML = '<p>У вас пока нет колоний.</p>';
+    else {
+        let html = `<p>Всего колоний: <strong>${playerColonies.length}</strong></p>`;
+        playerColonies.forEach(colony => { html += `<div class="capture-info"><strong>${colony.name}</strong> (Сектор: ${colony.position})<br>Тип: ${colony.type === 'resource' ? 'Ресурсная' : 'Крепость'}<br><small>Осталось ходов: ${colony.lifespan}</small></div>`; });
+        body.innerHTML = html;
+    }
+    openModal('coloniesModal');
+}
+
+function startOilFieldCapture(squadId, cellIndex, targetOwnerId) {
+    const squad = state.squads.find(s => s.id === squadId); if (!squad) return;
+    if (squad.capturingOilField) return alert('Уже захватываете месторождение.');
+    if (squad.capturingColony || squad.capturingCountry) return alert('Отряд уже занят захватом.');
+    const cell = getCellAt(cellIndex); if (!cell) return;
+    // Изм. #15: 5 ходов на захват чужого месторождения
+    squad.capturingOilField = { cellIndex, targetOwnerId, turnsRemaining: 5 };
+    squad.movesLeft = 0;
+    log(`Отряд "${squad.name}" начал захват нефтяного месторождения (сектор ${cellIndex}, 5 ходов).`);
+    render();
+}
+
+function destroyOilField(squadId, cellIndex, targetOwnerId) {
+    const squad = state.squads.find(s => s.id === squadId); if (!squad) return;
+    const cell = getCellAt(cellIndex); if (!cell) return;
+    if (!confirm(`Уничтожить месторождение в секторе ${cellIndex}?`)) return;
+    const ownerCountry = state.enemyCountries.find(c => c.id === targetOwnerId);
+    if (ownerCountry) ownerCountry.oilFields = ownerCountry.oilFields.filter(f => f.cellIndex !== cellIndex);
+    else if (targetOwnerId === state.name) state.oilFields = state.oilFields.filter(f => f.cellIndex !== cellIndex);
+    cell.objects = cell.objects.filter(o => o.type !== 'oil_field');
+    log(`<span class="victory">Отряд "${squad.name}" уничтожил месторождение в секторе ${cellIndex}!</span>`);
+    render();
+}
+
+function renderWorldMap() {
+    const viewRadius = 40;
+    const start = Math.max(0, state.focusSector - viewRadius);
+    const end = Math.min(state.worldMap.cells.length - 1, state.focusSector + viewRadius);
+    const visibleCells = state.worldMap.cells.slice(start, end + 1);
+
+    let html = `<div style="font-size:11px; color:#888; margin-bottom:5px;">Секторы ${start}–${end} из ${state.worldMap.cells.length - 1}. Фокус: ${state.focusSector}. Сезон: ${getSeasonLabel()}</div>`;
+    html += '<div class="world-map-container" id="worldMapContainer"><div class="world-map-grid">';
+
+    visibleCells.forEach(cell => {
+        let content = `<div class="map-cell-label">Сектор ${cell.index}</div>`; let cellContent = '';
+        if (cell.objects.find(o => o.type === 'player_base')) cellContent += `<div><strong style="color:${state.color}">★ ${state.name}</strong></div>`;
+        const enemyBase = cell.objects.find(o => o.type === 'country_base');
+        if (enemyBase) {
+            const country = state.enemyCountries.find(c => c.id === enemyBase.id);
+            if (country && !country.captured) {
+                const icon = country.isTitan ? '👹' : (country.isDesert ? '🏜️' : '☆');
+                cellContent += `<div><strong style="color:${country.color}">${icon} ${country.name.substring(0, 10)}</strong></div>`;
+            }
+        }
+        const garrisonInCell = cell.objects.find(o => o.type === 'garrison');
+        if (garrisonInCell) cellContent += `<div style="color:#8B4513; font-size:9px;">🏰 ${garrisonInCell.defeated ? 'разбит' : garrisonInCell.tanks + ' 🚗'}</div>`;
+        const titanInCell = cell.objects.find(o => o.type === 'titan');
+        if (titanInCell) {
+            const titanArmy = titanInCell.army || {};
+            const titanPower = getArmyPower(titanArmy.infantry || 0, titanArmy.cavalry || 0, titanArmy.shooters || 0, null, titanArmy.tanks || 0, { army: titanArmy, artifacts: [], wins: 0 });
+            cellContent += `<div style="color:#6a0505; font-size:9px;">👹 ${titanInCell.name}</div>`;
+        }
+        // Изм. #19: болото — 🪸
+        const swampInCell = cell.objects.find(o => o.type === 'swamp');
+        if (swampInCell) cellContent += `<div style="color:#2d6a2d; font-size:9px;">🪸 Болото</div>`;
+        const oilInCell = cell.objects.find(o => o.type === 'oil_field');
+        if (oilInCell) {
+            let ownerName = oilInCell.ownerId === state.name ? 'Ваша' : (state.enemyCountries.find(c => c.id === oilInCell.ownerId)?.name?.substring(0, 6) || 'Нейтр.');
+            cellContent += `<div style="color:#555; font-size:9px;">⛽ (${ownerName})</div>`;
+        }
+        const colonyInCell = cell.objects.find(o => o.type === 'colony');
+        if (colonyInCell) { const colony = state.colonies.find(c => c.id === colonyInCell.id); if (colony) { let ind = colony.ownerId === state.name ? '✅' : (colony.ownerId !== null ? '❌' : '🗺️'); cellContent += `<div>${ind} ${colony.name.charAt(0)}</div>`; } }
+        // Изм. #12: маркер атаки для игрока
+        cell.objects.filter(o => o.type === 'squad_player').forEach(ps => {
+            const squad = state.squads.find(s => s.id === ps.squadId);
+            if (squad) {
+                const rankLabel = getSquadRank(squad).name;
+                const attackMarker = squad.capturingCountry ? ' ⚔️' : '';
+                cellContent += `<div style="font-size:9px; color:${state.color}">(${squad.name.substring(0, 7)}|${rankLabel}${attackMarker})</div>`;
+            }
+        });
+        cell.objects.filter(o => o.type === 'squad_enemy').forEach(es => {
+            const country = state.enemyCountries.find(c => c.id === es.ownerId); const squad = country ? country.squads.find(s => s.id === es.squadId) : null;
+            if (squad && country) {
+                const attackMarker = squad.capturingCountry ? ' ⚔️' : '';
+                const power = getArmyPower(squad.army.infantry, squad.army.cavalry, squad.army.shooters, country.general.hired ? country.general : null, squad.army.tanks, squad);
+                cellContent += `<div style="font-size:9px; color:${country.color}">(${squad.name.substring(0, 7)}|${Math.round(power)}${attackMarker})</div>`;
+            }
+        });
+        const swampBg = swampInCell ? 'background:#d4edda;' : '';
+        const garrisonBg = garrisonInCell ? 'background:#f5deb3;' : '';
+        html += `<div class="map-cell" id="cell-${cell.index}" style="${cell.index === state.homeBaseIndex ? `border: 2px solid ${state.color};` : ''}${cell.index === state.focusSector ? 'border: 2px solid #f0ad4e;' : ''}${swampBg}${garrisonBg}"><div class="map-cell-content">${content}${cellContent || 'пусто'}</div></div>`;
+    });
+    html += '</div></div>';
+    return html;
+}
+
+function renderSquads() {
+    let html = '<div class="squad-management-box">';
+
+    state.squads.forEach(squad => {
+        const squadArmyParts = [];
+        // Изм. #21: иконка пехоты 🗡️; изм. #20: танки 🚗
+        if (squad.army.infantry > 0) squadArmyParts.push(`🗡️ ${squad.army.infantry}`);
+        if (squad.army.cavalry > 0) squadArmyParts.push(`🐎 ${squad.army.cavalry}`);
+        if (squad.army.shooters > 0) squadArmyParts.push(`🏹 ${squad.army.shooters}`);
+        if ((squad.army.tanks || 0) > 0) squadArmyParts.push(`🚗 ${squad.army.tanks}`);
+
+        const currentCell = getCellAt(squad.position);
+        let actionButtons = '';
+
+        if (currentCell) {
+            const neutralColony = currentCell.objects.find(o => o.type === 'colony' && state.colonies.find(c => c.id === o.id)?.ownerId === null);
+            if (neutralColony && !squad.capturingColony && !squad.capturingCountry) {
+                actionButtons += `<button onclick="startColonyCapture(${squad.id}, ${neutralColony.id})">Захватить колонию</button>`;
+            }
+            if (squad.capturingColony) {
+                actionButtons += `<span class="capture-info" style="display:inline-block;">🏗️ Захват колонии: ${squad.capturingColony.turnsRemaining} ход.</span>`;
+            }
+
+            const countryBase = currentCell.objects.find(o => o.type === 'country_base');
+            if (countryBase) {
+                const country = state.enemyCountries.find(ec => ec.id === countryBase.id);
+                if (country && !country.captured && country.immunityTurns === 0 && state.allyId !== country.id) {
+                    if (!squad.capturingCountry) {
+                        actionButtons += `<button onclick="startCountryCapture(${squad.id}, ${country.id})">⚔️ Атака ${country.name}</button>`;
+                    } else if (squad.capturingCountry.countryId === country.id) {
+                        actionButtons += `<span class="capture-info" style="display:inline-block;">⚔️ Захват ${country.name}: ${squad.capturingCountry.turnsRemaining} ход.</span>`;
+                        actionButtons += `<button onclick="openRaidModal(${squad.id}, ${country.id})">🏴 Рейд</button>`;
+                    }
+                }
+            }
+
+            const enemySquadsInCell = currentCell.objects.filter(o => o.type === 'squad_enemy');
+            enemySquadsInCell.forEach(es => {
+                const ec = state.enemyCountries.find(c => c.id === es.ownerId);
+                if (ec && !ec.captured && state.allyId !== ec.id) {
+                    actionButtons += `<button onclick="attackEnemySquad(${squad.id}, {squadId: ${es.squadId}, ownerId: ${es.ownerId}})">⚔️ Атака "${ec.squads.find(s => s.id === es.squadId)?.name || '?'}"</button>`;
+                    if (state.espionage.recruitLvl > 0) actionButtons += `<button onclick="uiRecruitSpecificSquad(${squad.id}, ${es.squadId}, ${es.ownerId})">🤝 Вербовка</button>`;
+                }
+            });
+
+            const oilFieldInCell = currentCell.objects.find(o => o.type === 'oil_field');
+            if (oilFieldInCell && oilFieldInCell.ownerId !== state.name) {
+                const ownerIdParam = typeof oilFieldInCell.ownerId === 'string' ? `'${oilFieldInCell.ownerId}'` : oilFieldInCell.ownerId;
+                if (!squad.capturingOilField) {
+                    actionButtons += `<button onclick="startOilFieldCapture(${squad.id}, ${currentCell.index}, ${ownerIdParam})">Захватить нефть (5 ходов)</button>`;
+                } else {
+                    actionButtons += `<span>🔒 Захват нефти: ${squad.capturingOilField.turnsRemaining} ход.</span>`;
+                }
+                actionButtons += `<button onclick="destroyOilField(${squad.id}, ${currentCell.index}, ${ownerIdParam})">Уничтожить нефть</button>`;
+            } else if (oilFieldInCell && oilFieldInCell.ownerId === state.name) {
+                actionButtons += `<span>⛽ Ваше месторождение</span>`;
+            }
+
+            // Изм. #8: разработка болота через меню отрядов; изм. #19: иконка 🪸
+            const swampInCell = currentCell.objects.find(o => o.type === 'swamp');
+            const hasOilFieldHere = state.oilFields.find(f => f.cellIndex === currentCell.index) || state.enemyCountries.some(c => c.oilFields && c.oilFields.some(f => f.cellIndex === currentCell.index));
+            if (swampInCell && !hasOilFieldHere) {
+                actionButtons += `<button onclick="developOilFieldFromSquad(${squad.id})">⛽ Разработать болото 🪸</button>`;
+            }
+        }
+
+        // Изм. #4: генерал страновой — показываем просто факт наличия генерала
+        const power = getArmyPower(squad.army.infantry, squad.army.cavalry, squad.army.shooters, state.general.hired ? state.general : null, squad.army.tanks, squad);
+        const rank = getSquadRank(squad);
+        const hasArtifacts = squad.artifacts && squad.artifacts.length > 0;
+        const artLabel = hasArtifacts ? ` 🏺${squad.artifacts.length}` : '';
+        const frozenLabel = squad.capturingOilField ? ' 🔒' : '';
+
+        let westEmpty = squad.position > 0;
+        let eastEmpty = squad.position < state.worldMap.cells.length - 1;
+
+        html += `<div class="squad-row">
+                <strong>Отряд "${squad.name}"</strong> <span class="rank-badge ${rank.cls}">${rank.name} (${squad.wins || 0} побед)</span>${artLabel}${frozenLabel}
+                <br><small>Сектор: ${squad.position} | Армия: ${squadArmyParts.length > 0 ? squadArmyParts.join(' / ') : "Нет войск"}</small>
+                <br><strong><small>Сила: ${Math.round(power)}</small></strong>${state.general.hired ? ` | <small>Генерал усиливает отряд ⭐</small>` : ''}
+                <div class="row" style="margin-top:5px;">
+                    <button ${squad.movesLeft <= 0 || squad.capturingOilField ? 'disabled' : ''} onclick="moveSquad(${squad.id}, -1)">← Запад</button>
+                    <span class="squad-moves" style="font-size:11px; color:${squad.movesLeft > 0 ? '#28a745' : '#c00'}">Ходов: ${squad.movesLeft}/3</span>
+                    <button ${squad.movesLeft <= 0 || squad.capturingOilField ? 'disabled' : ''} onclick="moveSquad(${squad.id}, 1)">Восток →</button>
+                    ${squad.position === state.homeBaseIndex ? `<button class="primary" onclick="openReinforceModal(${squad.id})">Подкрепление</button>` : ''}
+                    ${hasArtifacts ? `<button onclick="showSquadArtifacts(${squad.id})">🏺 Артефакты</button>` : ''}
+                    ${actionButtons}
+                </div>
+                <div class="row" style="margin-top:5px;">
+                    ${westEmpty && !squad.capturingOilField ? `<button onclick="buildRoad(${squad.id}, -1)">🛣️ Дорога Запад (50🌲)</button>` : ''}
+                    ${eastEmpty && !squad.capturingOilField ? `<button onclick="buildRoad(${squad.id}, 1)">🛣️ Дорога Восток (50🌲)</button>` : ''}
+                </div>
+            </div>`;
+    });
+
+    // Изм. #2: кнопка "Сформировать отряд" ВСЕГДА видна
+    if (state.squads.length < 3) html += `<button onclick="createSquad()" style="margin-top:8px;">➕ Сформировать новый отряд</button>`;
+    html += '</div>';
+    return html;
+}
+
+function render() {
+    const gameDiv = document.getElementById("game");
+    if (!state.gameStarted) { gameDiv.innerHTML = `<div class="start-screen"><h2>Новая игра</h2><input type="text" id="countryNameInput" class="start-input" placeholder="Название страны"><br><button onclick="startGame()" class="start-button">Начать</button><br><br><button onclick="showLeaderboard()">Зал Славы</button></div>`; return; }
+    if (state.gameOver) { gameDiv.innerHTML = `<div class="game-over" style="text-align:center; padding:60px 20px;"><h2>Игра окончена</h2><p>${state.deathReason}</p><h3>Итоговое могущество: ${state.score}</h3><button onclick="location.reload()" class="primary">В меню</button><button onclick="showLeaderboard()">Рейтинг</button></div>`; return; }
+
+    const buildingsMap = {
+        townhall: { name: "Ратуша", onclick: "openTownhall()" },
+        barracks: { name: "Казармы", onclick: "openModal('barracksModal'); updateBarracksUI();" },
+        village: { name: "Деревня", onclick: "showVillageModal()" },
+        market: { name: "Рынок", onclick: "showMarketModal()" },
+        university: { name: "Университет", onclick: "openModal('universityModal')" },
+        bank: { name: "Банк", onclick: "openModal('bankModal'); document.getElementById('bankGoldDisplay').innerText=state.resources.gold; document.getElementById('bankCurrentDeposit').innerText=state.bankInfo.deposit; document.getElementById('bankTurnsLeft').innerText=state.bankInfo.turnsLeft; document.getElementById('bankReputationDisplay').innerText=state.reputation; document.getElementById('bankRateDisplay').innerText=Math.round(getBankRate()*100);" },
+        factory: { name: "Завод", onclick: "openModal('factoryModal'); updateFactoryUI();" }
+    };
+    const buildingsHtml = Object.keys(state.buildings).map(k => {
+        const building = buildingsMap[k]; const buildingInQueue = state.buildingQueue.find(item => item.type === k);
+        if (state.buildings[k] === 1) return `<button onclick="${building.onclick}" class="primary">${building.name}</button>`;
+        else if (buildingInQueue) return `<button disabled>${building.name} (${buildingInQueue.turnsLeft}х)</button>`;
+        else return `<button onclick="build('${k}')">Построить ${building.name}</button>`;
+    }).join(' ');
+
+    const totalCountries = countTotalCountries();
+    const totalArtifacts = countTotalArtifacts();
+
+    // Изм. #36: убраны ресурсы рынка из глобальной статистики
+    const statsHtml = `<div class="global-stats-box"><strong>Статистика:</strong>
+        Потеряно: <span style="color:#c00;">${state.globalStats.lostTroops}</span> |
+        Уничтожено врагов: <span style="color:#28a745;">${state.globalStats.killedTroops}</span> |
+        Захвачено: <span>${state.globalStats.playerCapturedCountries}</span> |
+        Стран на карте: <span>${totalCountries}</span> |
+        Колоний: ${state.colonies.length} |
+        Артефактов: 🏺${totalArtifacts}<br>
+        Рабочих: <b>${state.workers}</b> | Учёных: <b>${state.scientists}</b> | Репутация: <b>${state.reputation}</b>
+    </div>`;
+
+    let armyAtBaseParts = [];
+    // Изм. #21: иконки; изм. #20: 🚗
+    if (state.army.infantry > 0) armyAtBaseParts.push(`🗡️ ${state.army.infantry}`);
+    if (state.army.cavalry > 0) armyAtBaseParts.push(`🐎 ${state.army.cavalry}`);
+    if (state.army.shooters > 0) armyAtBaseParts.push(`🏹 ${state.army.shooters}`);
+    if ((state.army.tanks || 0) > 0) armyAtBaseParts.push(`🚗 ${state.army.tanks}`);
+
+    const seasonBadge = `<span class="season-badge ${state.season === 'summer' ? 'season-summer' : 'season-winter'}">${getSeasonLabel()}</span>`;
+    const generalInfo = state.general.hired ? `⭐ <b>${state.general.name}</b> (навык: ${state.general.skill}, опыт: ${state.general.exp})` : '<span style="color:#888;">Нет генерала</span>';
+
+    const discInfo = state.discoveries && state.discoveries.length > 0 ? `🔬 Открытий: ${state.discoveries.length}` : '';
+
+    gameDiv.innerHTML = `<div class="game-container">
+        <div class="game-left">
+            <div class="sect"><div class="row" style="justify-content:space-between"><span style="font-size:1.2em; font-weight:bold; color:${state.color};">${state.name}${seasonBadge}</span><button onclick="nextTurn()" class="primary">Следующий ход (${state.turn})</button></div>
+            <div style="font-size:12px; margin-top:5px;">${generalInfo} | ${discInfo}</div>
+            </div>
+            ${statsHtml}
+            <div class="sect"><span class="sect-title">Ресурсы</span><div class="resource-bar">💰 ${state.resources.gold} &nbsp; 🍖 ${state.resources.food} &nbsp; ⛏️ ${state.resources.iron} &nbsp; 🌲 ${state.resources.wood} &nbsp; ⛽ ${state.resources.oil || 0}</div></div>
+            <div class="sect"><span class="sect-title">Город</span><div class="row">${buildingsHtml}</div></div>
+            <div class="sect"><span class="sect-title">Армия на базе</span><div style="margin-bottom:10px;">${armyAtBaseParts.length > 0 ? armyAtBaseParts.join(' / ') : "Нет войск"}</div></div>
+            <div class="sect"><span class="sect-title">Управление отрядами</span>${renderSquads()}</div>
+            <div class="sect"><span class="sect-title">Карта мира (1000 секторов)</span>${renderWorldMap()}</div>
+            <div class="sect"><span class="sect-title">Администрирование</span>
+                <div class="row">
+                    ${!state.general.hired ? '<button onclick="openModal(\'hireGeneralModal\')">Нанять генерала</button>' : ''}
+                    <button onclick="showNeighbors()">🌍 Соседи</button>
+                    <button onclick="showColonies()">Колонии</button>
+                    <button onclick="openHomeGuardModal()">🏰 Охрана${(state.homeGuard && (state.homeGuard.infantry + state.homeGuard.cavalry + state.homeGuard.shooters + (state.homeGuard.tanks || 0)) > 0 ? ' ✓' : '')}</button>
+                    ${(state.unknownArtifacts && state.unknownArtifacts.length > 0) ? `<button onclick="openUnknownArtifactsModal()">🔍 Артефакты (${state.unknownArtifacts.length})</button>` : ''}
+                    <button onclick="showLeaders()">Лидеры</button>
+                    <button class="primary" onclick="triggerEndGame()" style="background:#dc3545; border-color:#dc3545;">Завершить игру</button>
+                </div>
+            </div>
+        </div>
+        <div class="game-right">
+            <div class="sect" style="border:none;">
+                <span class="sect-title">Журнал событий</span>
+                <div id="gameLog" class="log-container"></div>
+                <button onclick="showFullLog()" style="margin-top:8px; font-size:11px; width:100%;">📜 Полная история (${state.log.length} записей)</button>
+            </div>
+            <div style="text-align:center; margin-top:10px;"><button onclick="showLeaderboard()" style="font-size:12px; color:#999;">Топ игроков</button></div>
+        </div>
+    </div>`;
+    renderLogOnly();
+
+    setTimeout(() => {
+        const focusEl = document.getElementById(`cell-${state.focusSector}`); const container = document.getElementById('worldMapContainer');
+        if (focusEl && container) { const scrollLeftPos = focusEl.offsetLeft - (container.offsetWidth / 2) + (focusEl.offsetWidth / 2); container.scrollLeft = scrollLeftPos; }
+    }, 50);
+}
+
+render();
+</script>
+</body>
+</html>
